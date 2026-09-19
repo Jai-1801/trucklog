@@ -69,3 +69,33 @@
 .leaflet-popup-content {
   margin: 12px 14px;
 }
+
+/* Print: only the log sheets, one per page, no app chrome. */
+@media print {
+  @page {
+    size: letter landscape;
+    margin: 0.4in;
+  }
+  body {
+    background: #fff;
+  }
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    border: 0;
+  }
+  .log-page {
+    break-after: page;
+  }
+  .log-page:last-child {
+    break-after: auto;
+  }
+}

@@ -1,7 +1,9 @@
 import { useMutation } from '@tanstack/react-query'
 import { AlertCircle, FileText, Map as MapIcon, RotateCw, Truck } from 'lucide-react'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { GithubMark } from './components/GithubMark'
+import { LogSheets } from './features/eld-log/LogSheets'
+import { Assumptions } from './features/summary/Assumptions'
 import { Itinerary } from './features/itinerary/Itinerary'
 import { RouteMap } from './features/route-map/RouteMap'
 import { TripSummary } from './features/summary/TripSummary'
@@ -14,7 +16,16 @@ const LOADING_STEPS = ['Finding locations', 'Routing for trucks', 'Applying HOS 
 export default function App() {
   const [activeStopId, setActiveStopId] = useState<string | null>(null)
   const [lastRequest, setLastRequest] = useState<PlanRequest | null>(null)
-  const mutation = useMutation<TripPlan, ApiError, PlanRequest>({ mutationFn: planTrip })
+  const results = useRef<HTMLDivElement>(null)
+  const mutation = useMutation<TripPlan, ApiError, PlanRequest>({
+    mutationFn: planTrip,
+    onSuccess: () => {
+      // On narrow screens the form sits above the results: bring them into view.
+      if (window.matchMedia('(max-width: 1023px)').matches) {
+        requestAnimationFrame(() => results.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }))
+      }
+    },
+  })
 
   const submit = (request: PlanRequest) => {
     setLastRequest(request)
@@ -23,6 +34,7 @@ export default function App() {
   }
 
   const plan = mutation.data
+  const showPlan = plan !== undefined && !mutation.isPending
   const error = mutation.error
   const fieldErrors = error?.code === 'VALIDATION_ERROR' ? error.fields : undefined
 
@@ -58,7 +70,7 @@ export default function App() {
           </section>
         </aside>
 
-        <div className="min-w-0 space-y-5">
+        <div ref={results} className="min-w-0 scroll-mt-16 space-y-5">
           {error && error.code !== 'VALIDATION_ERROR' && (
             <div
               role="alert"
@@ -81,29 +93,26 @@ export default function App() {
             </div>
           )}
 
-          <section
-            aria-label="Route map"
-            className="relative h-[52vh] min-h-[340px] overflow-hidden rounded-card border border-line bg-surface lg:h-[480px]"
-          >
-            <RouteMap plan={plan} activeStopId={activeStopId} onStopHover={setActiveStopId} />
-            {mutation.isPending && <LoadingOverlay />}
-            {!plan && !mutation.isPending && <EmptyOverlay />}
-          </section>
+          {showPlan && <TripSummary plan={plan} />}
 
-          {plan && !mutation.isPending && (
-            <>
-              <TripSummary plan={plan} />
-              <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
+          <div className={`grid gap-5 ${showPlan ? 'xl:grid-cols-[minmax(0,1fr)_340px]' : ''}`}>
+            <section
+              aria-label="Route map"
+              className="relative h-[52vh] min-h-[340px] overflow-hidden rounded-card border border-line bg-surface lg:h-[500px]"
+            >
+              <RouteMap plan={plan} activeStopId={activeStopId} onStopHover={setActiveStopId} />
+              {mutation.isPending && <LoadingOverlay />}
+              {!plan && !mutation.isPending && <EmptyOverlay />}
+            </section>
+            {showPlan && (
+              <div className="xl:h-[500px]">
                 <Itinerary plan={plan} activeStopId={activeStopId} onStopHover={setActiveStopId} />
-                <section
-                  aria-label="Daily logs"
-                  className="grid min-h-60 place-items-center rounded-card border border-dashed border-line bg-surface text-sm text-muted"
-                >
-                  Daily log sheets: coming in M4
-                </section>
               </div>
-            </>
-          )}
+            )}
+          </div>
+
+          {showPlan && <LogSheets key={plan.summary.start_at + plan.summary.total_miles} plan={plan} />}
+          {showPlan && <Assumptions items={plan.assumptions} />}
         </div>
       </main>
     </div>

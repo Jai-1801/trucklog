@@ -20,14 +20,14 @@ export function Itinerary({ plan, activeStopId, onStopHover }: Props) {
   })
 
   return (
-    <section aria-labelledby="itinerary-title" className="rounded-card border border-line bg-surface">
+    <section aria-labelledby="itinerary-title" className="flex h-full flex-col rounded-card border border-line bg-surface">
       <header className="border-b border-line px-4 py-3">
         <h2 id="itinerary-title" className="text-sm font-semibold">
           Itinerary
         </h2>
         <p className="text-xs text-muted">Every duty change, in {plan.summary.timezone.replace('_', ' ')} time</p>
       </header>
-      <ol className="max-h-[560px] overflow-y-auto px-2 py-2">
+      <ol className="max-h-[520px] min-h-0 flex-1 overflow-y-auto px-2 py-2 xl:max-h-none">
         <li className="flex items-center gap-3 rounded-lg px-2 py-2">
           <Dot color={STOP_META.start.color} />
           <div className="min-w-0 flex-1">

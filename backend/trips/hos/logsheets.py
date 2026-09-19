@@ -108,6 +108,14 @@ def build_daily_logs(
                 segments.append(GridSegment(status, lo - day_start, hi - day_start))
 
         remarks = []
+        # A restart running through midnight gets a remark, or the sheet would show a
+        # whole day off duty with no explanation.
+        carried = next(
+            (e for e in events if offset + e.start_min < day_start < offset + e.end_min), None
+        )
+        if carried is not None and carried.kind == EventKind.RESTART:
+            left = min(offset + carried.end_min, day_end) - day_start
+            remarks.append(Remark(0, label_at(carried.start_mi), carried.kind, left))
         previous_status = None
         for e in events:
             at = offset + e.start_min

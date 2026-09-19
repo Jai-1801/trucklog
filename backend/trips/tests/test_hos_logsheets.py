@@ -160,3 +160,13 @@ def test_recap_uses_the_same_cycle_rounding_as_the_engine():
     (day,) = plan(0, 50, cycle_h=12.1)  # 12 h 06 m rounds up to 12 h 15 m
 
     assert day.cycle_total_min == 12 * 60 + 15 + day.on_duty_today_min
+
+
+def test_restart_carried_past_midnight_is_remarked():
+    _, day2, _ = plan(0, 500, cycle_h=65)  # restart runs D1 11:00 -> D2 21:00
+
+    assert [(r.time_min, r.kind, r.duration_min) for r in day2.remarks][0] == (
+        0,
+        EventKind.RESTART,
+        21 * 60,
+    )
