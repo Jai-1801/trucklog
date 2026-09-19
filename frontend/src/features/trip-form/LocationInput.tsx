@@ -6,15 +6,16 @@ import type { Place, PlaceInput } from '../../lib/types'
 
 type Props = {
   label: string
-  icon: ReactNode
-  hint?: string
+  /** Stop marker drawn in the route rail on the left. */
+  marker: ReactNode
   value: PlaceInput
   onChange: (value: PlaceInput) => void
   placeholder: string
   error?: string
 }
 
-export function LocationInput({ label, icon, hint, value, onChange, placeholder, error }: Props) {
+/** One stop in the grouped route box: marker, small label, big value, suggestions. */
+export function LocationInput({ label, marker, value, onChange, placeholder, error }: Props) {
   const id = useId()
   const listId = `${id}-list`
   const [suggestions, setSuggestions] = useState<Place[]>([])
@@ -71,44 +72,44 @@ export function LocationInput({ label, icon, hint, value, onChange, placeholder,
 
   return (
     <div className="relative">
-      <label htmlFor={id} className="mb-2 flex items-baseline justify-between gap-2 text-sm font-semibold text-ink">
-        {label}
-        {hint && <span className="text-xs font-medium text-subtle">{hint}</span>}
-      </label>
-      <div
-        className={`flex items-center gap-3 rounded-field border bg-surface px-4 transition-[border-color,box-shadow] hover:border-line-strong focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/12 ${
-          error ? 'border-status-restart' : 'border-line'
-        }`}
+      <label
+        htmlFor={id}
+        className="flex cursor-text items-center gap-4 px-5 py-3.5 transition-colors focus-within:bg-accent-soft/50 hover:bg-canvas/70"
       >
-        <span className="shrink-0" aria-hidden>
-          {icon}
+        <span className="relative z-10 grid size-9 shrink-0 place-items-center rounded-full bg-surface ring-1 ring-line">
+          {marker}
         </span>
-        <input
-          id={id}
-          role="combobox"
-          aria-expanded={showList}
-          aria-controls={listId}
-          aria-autocomplete="list"
-          aria-activedescendant={active >= 0 ? `${listId}-${active}` : undefined}
-          aria-invalid={Boolean(error)}
-          aria-describedby={error ? `${id}-error` : undefined}
-          autoComplete="off"
-          spellCheck={false}
-          className="h-12 w-full min-w-0 bg-transparent text-[15px] font-medium outline-none placeholder:font-normal placeholder:text-subtle"
-          placeholder={placeholder}
-          value={text}
-          onChange={(e) => {
-            onChange({ query: e.target.value })
-            setOpen(true)
-          }}
-          onFocus={() => setOpen(true)}
-          onBlur={() => setOpen(false)}
-          onKeyDown={onKeyDown}
-        />
-        {loading && <Loader2 className="size-4 shrink-0 animate-spin text-muted" aria-hidden />}
-      </div>
+        <span className="min-w-0 flex-1">
+          <span className={`block text-[11px] font-bold tracking-[0.08em] uppercase ${error ? 'text-status-restart' : 'text-subtle'}`}>
+            {label}
+          </span>
+          <input
+            id={id}
+            role="combobox"
+            aria-expanded={showList}
+            aria-controls={listId}
+            aria-autocomplete="list"
+            aria-activedescendant={active >= 0 ? `${listId}-${active}` : undefined}
+            aria-invalid={Boolean(error)}
+            aria-describedby={error ? `${id}-error` : undefined}
+            autoComplete="off"
+            spellCheck={false}
+            className="mt-0.5 h-7 w-full min-w-0 bg-transparent text-[16px] font-semibold outline-none placeholder:font-medium placeholder:text-subtle/80"
+            placeholder={placeholder}
+            value={text}
+            onChange={(e) => {
+              onChange({ query: e.target.value })
+              setOpen(true)
+            }}
+            onFocus={() => setOpen(true)}
+            onBlur={() => setOpen(false)}
+            onKeyDown={onKeyDown}
+          />
+        </span>
+        {loading && <Loader2 className="size-4 shrink-0 animate-spin text-subtle" aria-hidden />}
+      </label>
       {error && (
-        <p id={`${id}-error`} className="mt-2 text-[13px] font-medium text-status-restart">
+        <p id={`${id}-error`} className="-mt-1.5 pr-5 pb-3 pl-[76px] text-[13px] font-medium text-status-restart">
           {error}
         </p>
       )}
@@ -116,7 +117,7 @@ export function LocationInput({ label, icon, hint, value, onChange, placeholder,
         <ul
           id={listId}
           role="listbox"
-          className="absolute z-[1000] mt-2 w-full overflow-hidden rounded-field border border-line bg-surface p-1.5 shadow-[var(--shadow-float)]"
+          className="absolute inset-x-3 top-full z-[1000] -mt-1 overflow-hidden rounded-xl border border-line bg-surface p-1.5 shadow-[var(--shadow-float)]"
         >
           {suggestions.map((place, i) => (
             <li
@@ -124,7 +125,9 @@ export function LocationInput({ label, icon, hint, value, onChange, placeholder,
               id={`${listId}-${i}`}
               role="option"
               aria-selected={i === active}
-              className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] ${i === active ? 'bg-accent-soft text-accent-strong' : 'hover:bg-canvas'}`}
+              className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium ${
+                i === active ? 'bg-accent-soft text-accent-strong' : 'hover:bg-canvas'
+              }`}
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => choose(place)}
               onMouseEnter={() => setActive(i)}

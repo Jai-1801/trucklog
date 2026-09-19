@@ -6,10 +6,11 @@
 
 Enter where the truck is, the pickup, the dropoff and how many hours of the 70-hour cycle are already used. TruckLog routes the trip for a truck, places every fuel stop, 30-minute break, 10-hour rest and 34-hour restart where the rules require them, and draws a Driver's Daily Log for each calendar day of the trip.
 
-![Planner: route map, stops and itinerary](docs/screenshots/planner.jpg)
-![Daily log sheet drawn from the plan](docs/screenshots/daily-log.jpg)
+| 1. Enter the trip | 2. Route & stops | 3. Daily logs |
+|---|---|---|
+| ![Trip entry](docs/screenshots/entry.jpg) | ![Route, stops and itinerary](docs/screenshots/planner.jpg) | ![Daily log sheet](docs/screenshots/daily-log.jpg) |
 
-Try it with one click using the sample trips under the form: a regional run, a short haul, coast to coast, or a trip that runs out of cycle hours and needs a 34-hour restart.
+The flow is one step at a time: **enter the trip → a short preloader while it's planned → a results workspace** with tabs for *Route & stops*, *Daily logs* and *How it's planned*. "Edit trip" goes back with everything filled in. Try it with one click using the sample trips under the form: a short haul, a regional run, coast to coast, or a trip that runs out of cycle hours and needs a 34-hour restart.
 
 ## What you get
 
