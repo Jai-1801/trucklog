@@ -94,7 +94,7 @@ Environment variables (never commit real values; keep `.env.example` current):
 
 ## 7. Code conventions
 
-- **Python:** type hints everywhere, `@dataclass(frozen=True)` for engine models. Time is handled internally as **minutes since trip start (int)** or aware `datetime`, never floats of hours in logic. Hours appear only at the display/serializer edge. Round to 15-minute grid only when drawing, never inside the engine.
+- **Python:** type hints everywhere, `@dataclass(frozen=True)` for engine models. Time is handled internally as **minutes since trip start (int)** or aware `datetime`, never floats of hours in logic. Hours appear only at the display/serializer edge. The engine itself plans on a 15-minute grid (see `HOS_RULES.md` §6), so the drawing code never rounds.
 - **Engine purity:** `trips/hos/` imports nothing from Django, `requests`, or `services/`. Test it with plain pytest.
 - **External APIs:** always set a timeout (≤10 s), catch provider errors, and return a typed 4xx/5xx with a human message (`{"error": {"code": "ROUTE_NOT_FOUND", "message": "..."}}`). Cache geocode and route calls in-process (LRU) to spare free-tier quotas.
 - **TypeScript:** `strict: true`, no `any`. API types live in one file (`lib/types.ts`) that matches the contract. Components are small and presentational. Data fetching goes through TanStack Query.

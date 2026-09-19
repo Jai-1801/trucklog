@@ -64,7 +64,7 @@ Notes:
 - **Ordering when several limits hit at once:** 34h restart > 10h rest > fuel > 30-min break. A 10-h rest also satisfies the 30-min break. If fuel and break are both due, one 30-min `ON` fuel stop satisfies both, since R3 accepts on-duty time.
 - **Zero-length current→pickup leg** (driver already at pickup): skip the drive and go straight to the pickup task.
 - **Stop geolocation:** every non-driving event gets a coordinate by interpolating the odometer along the leg polyline. Labels come from a reverse geocode, formatted as "City, ST" (FMCSA remark format, p. 17).
-- **Precision:** simulate in whole minutes. Sub-minute rounding is carried forward so totals stay exact.
+- **Precision:** simulate in whole minutes on a 15-minute grid (`HosLimits.resolution_min`). Leg distance is anchored to the leg start, so each leg ends on its exact routed mileage.
 
 ## 4. Turning events into daily log sheets
 
@@ -142,3 +142,5 @@ For random distances 0–3,000 mi and cycle 0–70:
 | Pre/post-trip inspection | Off by default (stretch toggle: 15 min ON each) | Not in the brief's assumptions. Keeps totals verifiable |
 | Split sleeper | Not used | Simpler and always legal |
 | Time zone | The current location's zone for the whole trip (home-terminal rule, p. 16) | FMCSA requirement |
+| Time resolution | 15-min grid. Drive-leg times round **up** to the quarter hour, fuel stops come **earlier** to fit, cycle input rounds up, and the start time snaps to :00/:15/:30/:45 | Matches paper-log practice (FMCSA sample totals: 1.75, 7.75), so every line lands on a tick. Always errs on the safe side |
+| Driving per calendar day | May exceed 11 h on one sheet (e.g. 4.5 h before a rest plus 9 h after) | The 11-h and 14-h limits apply per duty period after 10 h off, not per calendar day (p. 6). The UI explains this in a tooltip |

@@ -3,7 +3,8 @@
 The driver starts fresh (10+ h off) at minute 0 and works through two legs:
 current -> pickup (then 1 h pickup), pickup -> dropoff (then 1 h dropoff).
 Before every drive chunk, the engine takes whichever rest the rules demand, then
-drives until the nearest limit, leg end, or fuel point. Time is whole minutes.
+drives until the nearest limit, leg end, or fuel point. Time is whole minutes on a
+15-minute grid (HosLimits.resolution_min), like a paper log.
 Distance within a leg is linear in driving time, so odometer values are exact
 at leg ends.
 """
@@ -74,7 +75,8 @@ def _drive_leg(clock: _Clock, leg: Leg) -> None:
     lim = clock.limits
     if leg.distance_mi < MIN_DRIVE_MI:
         return
-    leg_minutes = max(1, round(leg.duration_min))
+    res = lim.resolution_min
+    leg_minutes = max(res, math.ceil(leg.duration_min / res - _EPS) * res)
     mi_per_min = leg.distance_mi / leg_minutes
     leg_start_mi = clock.odometer
     driven = 0
@@ -82,7 +84,7 @@ def _drive_leg(clock: _Clock, leg: Leg) -> None:
     while driven < leg_minutes:
         fuel_miles_left = lim.fuel_interval_mi - (clock.odometer - clock.last_fuel_mi)
         fuel_minutes_left = max(
-            0, math.floor(min(fuel_miles_left / mi_per_min, leg_minutes) + _EPS)
+            0, math.floor(min(fuel_miles_left / mi_per_min, leg_minutes) / res + _EPS) * res
         )
 
         if clock.cycle_min >= lim.cycle_min:
@@ -115,7 +117,10 @@ def simulate(
     limits: HosLimits | None = None,
 ) -> list[DutyEvent]:
     """Plan the trip. Returns contiguous duty events starting at minute 0."""
-    clock = _Clock(limits=limits or HosLimits(), cycle_min=cycle_used_min)
+    limits = limits or HosLimits()
+    res = limits.resolution_min
+    cycle_min = math.ceil(cycle_used_min / res) * res  # round up: never under-count
+    clock = _Clock(limits=limits, cycle_min=cycle_min)
 
     _drive_leg(clock, to_pickup)
     clock.on_duty_task(EventKind.PICKUP, clock.limits.pickup_min)

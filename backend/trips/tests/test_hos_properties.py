@@ -77,6 +77,7 @@ def test_every_plan_is_legal(inputs):
     audit(events, cycle)
     driven_legs = [mi for mi in (to_pickup_mi, to_dropoff_mi) if mi >= MIN_DRIVE_MI]
     assert abs(events[-1].end_mi - sum(driven_legs)) < 1e-6
+    assert all(e.start_min % 15 == 0 and e.end_min % 15 == 0 for e in events), "off grid"
     kinds = [e.kind for e in events]
     assert kinds.count(EventKind.PICKUP) == 1
     assert kinds[-1] == EventKind.DROPOFF

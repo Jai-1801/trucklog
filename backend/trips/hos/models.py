@@ -42,6 +42,9 @@ class HosLimits:
     fuel_min: int = 30
     pickup_min: int = 60
     dropoff_min: int = 60
+    # Paper logs are drawn to the quarter hour. Drive times round up and fuel stops come
+    # earlier to fit, so every event lands on a grid tick and the plan stays conservative.
+    resolution_min: int = 15
 
 
 @dataclass(frozen=True)
