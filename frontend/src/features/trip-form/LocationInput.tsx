@@ -1,12 +1,13 @@
-import { Loader2, MapPin } from 'lucide-react'
+import { Loader2 } from 'lucide-react'
 import { type KeyboardEvent, type ReactNode, useEffect, useId, useState } from 'react'
 import { autocomplete } from '../../lib/api'
 import { displayText } from '../../lib/place'
 import type { Place, PlaceInput } from '../../lib/types'
+import { fieldClass } from '../../lib/ui'
 
 type Props = {
   label: string
-  /** Stop marker drawn in the route rail on the left. */
+  hint?: string
   marker: ReactNode
   value: PlaceInput
   onChange: (value: PlaceInput) => void
@@ -14,8 +15,7 @@ type Props = {
   error?: string
 }
 
-/** One stop in the grouped route box: marker, small label, big value, suggestions. */
-export function LocationInput({ label, marker, value, onChange, placeholder, error }: Props) {
+export function LocationInput({ label, hint, marker, value, onChange, placeholder, error }: Props) {
   const id = useId()
   const listId = `${id}-list`
   const [suggestions, setSuggestions] = useState<Place[]>([])
@@ -72,44 +72,40 @@ export function LocationInput({ label, marker, value, onChange, placeholder, err
 
   return (
     <div className="relative">
-      <label
-        htmlFor={id}
-        className="flex cursor-text items-center gap-4 px-5 py-3.5 transition-colors focus-within:bg-accent-soft/50 hover:bg-canvas/70"
-      >
-        <span className="relative z-10 grid size-9 shrink-0 place-items-center rounded-full bg-surface ring-1 ring-line">
+      <label htmlFor={id} className="mb-2 flex items-baseline justify-between text-sm font-medium">
+        {label}
+        {hint && <span className="text-[13px] font-normal text-subtle">{hint}</span>}
+      </label>
+      <div className={`flex items-center gap-3 px-3.5 ${fieldClass} ${error ? 'border-status-restart' : 'border-line-strong'}`}>
+        <span className="flex w-4 shrink-0 justify-center" aria-hidden>
           {marker}
         </span>
-        <span className="min-w-0 flex-1">
-          <span className={`block text-[11px] font-bold tracking-[0.08em] uppercase ${error ? 'text-status-restart' : 'text-subtle'}`}>
-            {label}
-          </span>
-          <input
-            id={id}
-            role="combobox"
-            aria-expanded={showList}
-            aria-controls={listId}
-            aria-autocomplete="list"
-            aria-activedescendant={active >= 0 ? `${listId}-${active}` : undefined}
-            aria-invalid={Boolean(error)}
-            aria-describedby={error ? `${id}-error` : undefined}
-            autoComplete="off"
-            spellCheck={false}
-            className="mt-0.5 h-7 w-full min-w-0 bg-transparent text-[16px] font-semibold outline-none placeholder:font-medium placeholder:text-subtle/80"
-            placeholder={placeholder}
-            value={text}
-            onChange={(e) => {
-              onChange({ query: e.target.value })
-              setOpen(true)
-            }}
-            onFocus={() => setOpen(true)}
-            onBlur={() => setOpen(false)}
-            onKeyDown={onKeyDown}
-          />
-        </span>
+        <input
+          id={id}
+          role="combobox"
+          aria-expanded={showList}
+          aria-controls={listId}
+          aria-autocomplete="list"
+          aria-activedescendant={active >= 0 ? `${listId}-${active}` : undefined}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? `${id}-error` : undefined}
+          autoComplete="off"
+          spellCheck={false}
+          className="h-11 w-full min-w-0 bg-transparent text-[15px] outline-none placeholder:text-subtle"
+          placeholder={placeholder}
+          value={text}
+          onChange={(e) => {
+            onChange({ query: e.target.value })
+            setOpen(true)
+          }}
+          onFocus={() => setOpen(true)}
+          onBlur={() => setOpen(false)}
+          onKeyDown={onKeyDown}
+        />
         {loading && <Loader2 className="size-4 shrink-0 animate-spin text-subtle" aria-hidden />}
-      </label>
+      </div>
       {error && (
-        <p id={`${id}-error`} className="-mt-1.5 pr-5 pb-3 pl-[76px] text-[13px] font-medium text-status-restart">
+        <p id={`${id}-error`} className="mt-1.5 text-[13px] text-status-restart">
           {error}
         </p>
       )}
@@ -117,7 +113,7 @@ export function LocationInput({ label, marker, value, onChange, placeholder, err
         <ul
           id={listId}
           role="listbox"
-          className="absolute inset-x-3 top-full z-[1000] -mt-1 overflow-hidden rounded-xl border border-line bg-surface p-1.5 shadow-[var(--shadow-float)]"
+          className="absolute inset-x-0 top-full z-[1000] mt-1 overflow-hidden rounded-field border border-line bg-surface py-1 shadow-[0_6px_20px_rgb(28_25_23/0.1)]"
         >
           {suggestions.map((place, i) => (
             <li
@@ -125,15 +121,12 @@ export function LocationInput({ label, marker, value, onChange, placeholder, err
               id={`${listId}-${i}`}
               role="option"
               aria-selected={i === active}
-              className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] font-medium ${
-                i === active ? 'bg-accent-soft text-accent-strong' : 'hover:bg-canvas'
-              }`}
+              className={`cursor-pointer truncate px-3.5 py-2 text-[14px] ${i === active ? 'bg-accent-soft text-accent-strong' : ''}`}
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => choose(place)}
               onMouseEnter={() => setActive(i)}
             >
-              <MapPin className="size-4 shrink-0 text-subtle" aria-hidden />
-              <span className="truncate">{place.label}</span>
+              {place.label}
             </li>
           ))}
         </ul>

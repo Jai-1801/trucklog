@@ -36,7 +36,7 @@ export const SAMPLES: Sample[] = [
   {
     name: 'Regional run',
     route: 'Chicago → St. Louis → Dallas',
-    shows: '30-min break and 10-hr rests',
+    shows: '30-min break and 10-h rests',
     current: CHICAGO,
     pickup: ST_LOUIS,
     dropoff: DALLAS,
@@ -45,7 +45,7 @@ export const SAMPLES: Sample[] = [
   {
     name: 'Coast to coast',
     route: 'New York → Chicago → Los Angeles',
-    shows: 'Fuel stops across 7 days',
+    shows: 'Fuel stops over seven days',
     current: NEW_YORK,
     pickup: CHICAGO,
     dropoff: LOS_ANGELES,
@@ -54,7 +54,7 @@ export const SAMPLES: Sample[] = [
   {
     name: 'Cycle nearly used',
     route: 'Atlanta → Nashville → Denver',
-    shows: '62 h used: forces a 34-hr restart',
+    shows: 'Forces a 34-h restart',
     current: ATLANTA,
     pickup: NASHVILLE,
     dropoff: DENVER,

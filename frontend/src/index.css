@@ -2,33 +2,30 @@
 
 /* Design tokens: docs/BUILD.md §8. Use these names, never raw hex, in components. */
 @theme {
-  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, sans-serif;
 
-  --color-canvas: #f5f7fa;
+  /* Warm neutrals + one accent. Orange is for actions, the route and the active state only. */
+  --color-canvas: #fafaf9;
   --color-surface: #ffffff;
-  --color-line: #e6e9ef;
-  --color-line-strong: #d5dae3;
-  --color-ink: #0b1324;
-  --color-muted: #5d6779;
-  --color-subtle: #8a93a3;
-  --color-accent: #2563eb;
-  --color-accent-strong: #1d4ed8;
-  --color-accent-soft: #eef4ff;
+  --color-line: #e7e5e4;
+  --color-line-strong: #d6d3d1;
+  --color-ink: #1c1917;
+  --color-muted: #57534e;
+  --color-subtle: #a8a29e;
+  --color-accent: #ea580c;
+  --color-accent-strong: #c2410c;
+  --color-accent-soft: #fff7ed;
 
-  --color-status-driving: #2563eb;
-  --color-status-on: #f59e0b;
-  --color-status-off: #64748b;
-  --color-status-sleeper: #7c3aed;
-  --color-status-restart: #dc2626;
-  --color-pin-pickup: #16a34a;
-  --color-pin-dropoff: #0b1324;
+  --color-status-driving: #ea580c;
+  --color-status-on: #0f766e;
+  --color-status-off: #78716c;
+  --color-status-sleeper: #6d28d9;
+  --color-status-restart: #b91c1c;
+  --color-pin-pickup: #15803d;
+  --color-pin-dropoff: #1c1917;
 
-  --radius-card: 16px;
-  --radius-field: 12px;
-
-  --shadow-card: 0 1px 2px rgb(11 19 36 / 0.04), 0 4px 16px rgb(11 19 36 / 0.04);
-  --shadow-float: 0 12px 40px rgb(11 19 36 / 0.12);
+  --radius-card: 8px;
+  --radius-field: 6px;
 }
 
 @layer base {
@@ -39,7 +36,7 @@
   }
 
   body {
-    background: var(--color-canvas);
+    background: var(--color-surface);
     color: var(--color-ink);
   }
 
@@ -64,19 +61,19 @@
   place-items: center;
   border-radius: 9999px;
   border: 2.5px solid #fff;
-  box-shadow: 0 1px 2px rgb(15 23 42 / 0.25), 0 4px 10px rgb(15 23 42 / 0.15);
+  box-shadow: 0 1px 3px rgb(28 25 23 / 0.3);
   transition: transform 150ms ease-out;
 }
 .trip-marker[data-active='true'] {
-  box-shadow: 0 0 0 4px rgb(37 99 235 / 0.25), 0 4px 12px rgb(15 23 42 / 0.25);
+  box-shadow: 0 0 0 4px rgb(234 88 12 / 0.25), 0 2px 6px rgb(28 25 23 / 0.25);
 }
 .leaflet-container {
   font-family: var(--font-sans);
-  background: #eef2f6;
+  background: #f5f5f4;
 }
 .leaflet-popup-content-wrapper {
-  border-radius: 10px;
-  box-shadow: 0 8px 24px rgb(15 23 42 / 0.15);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgb(28 25 23 / 0.12);
 }
 .leaflet-popup-content {
   margin: 12px 14px;
@@ -140,14 +137,6 @@
     transform: translateY(-1.5px);
   }
 }
-@keyframes pass-by {
-  from {
-    transform: translateX(360px);
-  }
-  to {
-    transform: translateX(-80px);
-  }
-}
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -163,9 +152,6 @@
 }
 .truck-bob {
   animation: truck-bob 0.5s ease-in-out infinite;
-}
-.pass-by {
-  animation: pass-by 2.4s linear infinite;
 }
 .fade-up {
   animation: fade-up 0.35s ease-out both;

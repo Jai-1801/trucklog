@@ -1,5 +1,5 @@
 import { formatDate, formatHours, formatTime } from '../../lib/format'
-import { STATUS_META, STOP_META } from '../../lib/status'
+import { STATUS_META } from '../../lib/status'
 import type { DutyEvent, TripPlan } from '../../lib/types'
 
 type Props = {
@@ -11,6 +11,11 @@ type Props = {
 const dayKey = (iso: string, timeZone: string) =>
   new Intl.DateTimeFormat('en-CA', { timeZone, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso))
 
+function title(event: DutyEvent): string {
+  return event.kind === 'drive' ? `Drive ${Math.round(event.miles).toLocaleString()} mi` : event.note
+}
+
+/** Every duty change as a timetable: time, status, what and where. */
 export function Itinerary({ plan, activeStopId, onStopHover }: Props) {
   const tz = plan.summary.timezone
   const groups = new Map<string, { event: DutyEvent; index: number }[]>()
@@ -20,65 +25,52 @@ export function Itinerary({ plan, activeStopId, onStopHover }: Props) {
   })
 
   return (
-    <section
-      aria-labelledby="itinerary-title"
-      className="flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface shadow-[var(--shadow-card)]"
-    >
+    <section aria-labelledby="itinerary-title" className="flex h-full flex-col overflow-hidden rounded-card border border-line">
       <header className="border-b border-line px-5 py-4">
-        <h3 id="itinerary-title" className="text-[15px] font-bold">
+        <h2 id="itinerary-title" className="text-[15px] font-semibold">
           Itinerary
-        </h3>
-        <p className="mt-0.5 text-[13px] text-muted">
-          Every duty change · {plan.summary.timezone.replace('_', ' ')} time
-        </p>
+        </h2>
+        <p className="mt-0.5 text-[13px] text-muted">Times in {tz.replace('_', ' ')} (home terminal)</p>
       </header>
-      <ol className="max-h-[560px] min-h-0 flex-1 overflow-y-auto p-3 xl:max-h-none">
-        <li className="flex items-center gap-3 rounded-xl px-3 py-3">
-          <Dot color={STOP_META.start.color} />
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-bold">Depart {plan.places.current.short}</p>
-          </div>
-          <time className="text-[13px] font-semibold text-muted tabular-nums">{formatTime(plan.summary.start_at, tz)}</time>
+      <ol className="max-h-[520px] min-h-0 flex-1 overflow-y-auto pb-3 lg:max-h-none">
+        <li className="grid grid-cols-[64px_10px_minmax(0,1fr)] items-baseline gap-3 px-5 pt-4 pb-2">
+          <time className="text-[13px] text-muted tabular-nums">{formatTime(plan.summary.start_at, tz)}</time>
+          <span className="size-2.5 translate-y-px rounded-full border-2 border-ink" aria-hidden />
+          <span className="text-sm font-medium">Depart {plan.places.current.short}</span>
         </li>
         {[...groups.entries()].map(([day, items]) => (
           <li key={day}>
-            <p className="sticky top-0 z-10 bg-surface/95 px-3 pt-4 pb-2 text-[11px] font-bold tracking-[0.08em] text-subtle uppercase backdrop-blur">
+            <p className="sticky top-0 z-10 border-b border-line bg-surface px-5 pt-4 pb-2 text-[13px] font-semibold">
               {formatDate(day)}
             </p>
             <ol>
               {items.map(({ event, index }) => {
                 const stopId = event.kind === 'drive' ? null : `s${index}`
-                const meta = STOP_META[event.kind]
-                const Icon = meta.icon
                 const active = stopId !== null && stopId === activeStopId
+                const status = STATUS_META[event.status]
                 return (
                   <li
                     key={index}
                     onMouseEnter={() => stopId && onStopHover(stopId)}
                     onMouseLeave={() => stopId && onStopHover(null)}
-                    className={`flex items-start gap-3 rounded-xl px-3 py-3 transition-colors ${
+                    className={`grid grid-cols-[64px_10px_minmax(0,1fr)] items-baseline gap-3 px-5 py-2.5 transition-colors ${
                       active ? 'bg-accent-soft' : stopId ? 'hover:bg-canvas' : ''
                     }`}
                   >
+                    <time className="text-[13px] text-muted tabular-nums">{formatTime(event.start_at, tz)}</time>
                     <span
-                      className="grid size-8 shrink-0 place-items-center rounded-full"
-                      style={{ background: `color-mix(in srgb, ${meta.color} 14%, transparent)`, color: meta.color }}
-                    >
-                      <Icon className="size-4" strokeWidth={2.3} aria-hidden />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold">
-                        {event.kind === 'drive' ? `Drive ${Math.round(event.miles).toLocaleString()} mi` : event.note}
-                      </p>
-                      <p className="mt-0.5 truncate text-[13px] text-muted">
-                        {event.kind === 'drive' ? `from ${event.location}` : event.location} ·{' '}
-                        <span style={{ color: STATUS_META[event.status].color }}>{STATUS_META[event.status].short}</span>{' '}
+                      className="size-2.5 translate-y-px rounded-[2px]"
+                      style={{ background: status.color }}
+                      title={status.label}
+                      aria-hidden
+                    />
+                    <span className="min-w-0">
+                      <span className="block text-sm font-medium">{title(event)}</span>
+                      <span className="mt-0.5 block truncate text-[13px] text-muted">
+                        {event.kind === 'drive' ? `From ${event.location}` : event.location} · {status.short}{' '}
                         {formatHours(event.duration_hrs)}
-                      </p>
-                    </div>
-                    <time className="pt-0.5 text-[13px] font-semibold whitespace-nowrap text-muted tabular-nums">
-                      {formatTime(event.start_at, tz)}
-                    </time>
+                      </span>
+                    </span>
                   </li>
                 )
               })}
@@ -88,8 +80,4 @@ export function Itinerary({ plan, activeStopId, onStopHover }: Props) {
       </ol>
     </section>
   )
-}
-
-function Dot({ color }: { color: string }) {
-  return <span className="mx-2.5 size-3 shrink-0 rounded-full ring-4 ring-canvas" style={{ background: color }} />
 }

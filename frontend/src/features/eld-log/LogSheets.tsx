@@ -1,4 +1,4 @@
-import { CheckCircle2, ChevronLeft, ChevronRight, Info, Printer } from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { type KeyboardEvent, useState } from 'react'
 import { formatDate, formatDecimalHours } from '../../lib/format'
 import { STATUS_META } from '../../lib/status'
@@ -26,7 +26,6 @@ export function LogSheets({ plan }: { plan: TripPlan }) {
   const days = plan.days
   const day = days[Math.min(active, days.length - 1)]
   const meta = sheetMeta(plan)
-  const allBalanced = days.every((d) => Math.abs(Object.values(d.totals).reduce((a, b) => a + b, 0) - 24) < 1e-9)
 
   const go = (i: number) => setActive(Math.max(0, Math.min(days.length - 1, i)))
   const onKeyDown = (e: KeyboardEvent) => {
@@ -34,110 +33,93 @@ export function LogSheets({ plan }: { plan: TripPlan }) {
     if (e.key === 'ArrowLeft') go(active - 1)
   }
 
+  const stepButton =
+    'grid size-9 shrink-0 place-items-center rounded-field border border-line-strong text-muted transition-colors hover:bg-canvas hover:text-ink disabled:opacity-40 disabled:hover:bg-transparent'
+
   return (
-    <section
-      aria-labelledby="logs-title"
-      className="print-area min-w-0 overflow-hidden rounded-card border border-line bg-surface shadow-[var(--shadow-card)]"
-    >
-      <header className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-line px-6 py-5 print:hidden">
-        <div className="mr-auto">
-          <h3 id="logs-title" className="text-[15px] font-bold">
-            {days.length} log sheet{days.length > 1 ? 's' : ''} for this trip
-          </h3>
-          <p className="mt-0.5 flex items-center gap-1.5 text-[13px] text-muted">
-            {allBalanced && <CheckCircle2 className="size-4 text-pin-pickup" aria-hidden />}
-            Every sheet totals exactly 24 hours · use ← → to switch days
+    <section aria-labelledby="logs-title" className="print-area min-w-0">
+      <div className="flex flex-wrap items-end justify-between gap-x-8 gap-y-4 print:hidden">
+        <div className="min-w-0">
+          <h2 id="logs-title" className="text-lg font-semibold tracking-[-0.01em]">
+            Day {day.day_number} of {days.length}
+            <span className="font-normal text-muted"> · {formatDate(day.date)}</span>
+          </h2>
+          <p className="mt-1 text-[13px] text-muted tabular-nums">
+            {Math.round(day.total_miles_driving).toLocaleString()} mi driven
+            {ORDER.map((status) => (
+              <span key={status}>
+                {' · '}
+                {STATUS_META[status].short} {formatDecimalHours(day.totals[status])} h
+              </span>
+            ))}
+            {' · '}
+            <span className="text-ink">{formatDecimalHours(day.recap.b_available_tomorrow)} h available tomorrow</span>
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => window.print()}
-          className="inline-flex h-10 items-center gap-2 rounded-field border border-line px-4 text-sm font-semibold transition hover:border-line-strong hover:bg-canvas"
-        >
-          <Printer className="size-4" aria-hidden /> Print / Save PDF
-        </button>
-      </header>
 
-      <div className="flex items-center gap-2 border-b border-line px-3 py-3 print:hidden">
-        <button
-          type="button"
-          aria-label="Previous day"
-          disabled={active === 0}
-          onClick={() => go(active - 1)}
-          className="grid size-10 shrink-0 place-items-center rounded-xl text-muted hover:bg-canvas disabled:opacity-30"
-        >
-          <ChevronLeft className="size-4" aria-hidden />
-        </button>
-        <div role="tablist" aria-label="Log sheet days" onKeyDown={onKeyDown} className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto">
-          {days.map((d, i) => (
-            <button
-              key={d.date}
-              role="tab"
-              id={`log-tab-${i}`}
-              aria-selected={i === active}
-              aria-controls={`log-panel-${i}`}
-              tabIndex={i === active ? 0 : -1}
-              onClick={() => setActive(i)}
-              className={`shrink-0 rounded-xl px-4 py-2.5 text-left transition-colors ${
-                i === active ? 'bg-ink text-white' : 'text-muted hover:bg-canvas hover:text-ink'
-              }`}
-            >
-              <span className="block text-[13px] font-bold">Day {d.day_number}</span>
-              <span className={`block text-xs ${i === active ? 'text-white/70' : ''}`}>{formatDate(d.date)}</span>
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <button type="button" aria-label="Previous day" disabled={active === 0} onClick={() => go(active - 1)} className={stepButton}>
+            <ChevronLeft className="size-4" aria-hidden />
+          </button>
+          <div
+            role="tablist"
+            aria-label="Log sheet days"
+            onKeyDown={onKeyDown}
+            className="flex max-w-[60vw] overflow-x-auto rounded-field border border-line-strong"
+          >
+            {days.map((d, i) => (
+              <button
+                key={d.date}
+                role="tab"
+                id={`log-tab-${i}`}
+                aria-selected={i === active}
+                aria-controls={`log-panel-${i}`}
+                tabIndex={i === active ? 0 : -1}
+                onClick={() => setActive(i)}
+                title={formatDate(d.date)}
+                className={`h-9 min-w-9 shrink-0 px-3 text-sm font-medium tabular-nums transition-colors [&:not(:first-child)]:border-l [&:not(:first-child)]:border-line-strong ${
+                  i === active ? 'bg-ink text-white' : 'text-muted hover:bg-canvas hover:text-ink'
+                }`}
+              >
+                {d.day_number}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            aria-label="Next day"
+            disabled={active === days.length - 1}
+            onClick={() => go(active + 1)}
+            className={stepButton}
+          >
+            <ChevronRight className="size-4" aria-hidden />
+          </button>
         </div>
-        <button
-          type="button"
-          aria-label="Next day"
-          disabled={active === days.length - 1}
-          onClick={() => go(active + 1)}
-          className="grid size-10 shrink-0 place-items-center rounded-xl text-muted hover:bg-canvas disabled:opacity-30"
-        >
-          <ChevronRight className="size-4" aria-hidden />
-        </button>
       </div>
 
-      <dl className="flex flex-wrap gap-2 px-6 pt-5 text-[13px] print:hidden">
-        <div className="flex gap-1.5 rounded-full bg-canvas px-3 py-1.5 ring-1 ring-line">
-          <dt className="text-muted">Miles</dt>
-          <dd className="font-bold tabular-nums">{Math.round(day.total_miles_driving).toLocaleString()}</dd>
-        </div>
-        {ORDER.map((status) => (
-          <div key={status} className="flex items-center gap-1.5 rounded-full bg-canvas px-3 py-1.5 ring-1 ring-line">
-            <span className="size-2 rounded-full" style={{ background: STATUS_META[status].color }} aria-hidden />
-            <dt className="text-muted">{STATUS_META[status].short}</dt>
-            <dd className="font-bold tabular-nums">{formatDecimalHours(day.totals[status])} h</dd>
-          </div>
-        ))}
-        <div className="flex gap-1.5 rounded-full bg-accent-soft px-3 py-1.5 ring-1 ring-accent/15">
-          <dt className="text-accent-strong/80">Available tomorrow</dt>
-          <dd className="font-bold text-accent-strong tabular-nums">{formatDecimalHours(day.recap.b_available_tomorrow)} h</dd>
-        </div>
-      </dl>
       {day.totals.D > 11 && (
-        <p className="mx-6 mt-4 flex items-start gap-2.5 rounded-xl bg-accent-soft px-4 py-3 text-[13px] leading-relaxed print:hidden">
-          <Info className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden />
-          <span>
-            {formatDecimalHours(day.totals.D)} h of driving on this calendar day is legal: it spans two duty periods with a
-            10-hour rest between them. The 11-hour limit applies per duty period, not per calendar day.
-          </span>
+        <p className="mt-4 border-l-2 border-accent pl-3 text-[13px] leading-relaxed text-muted print:hidden">
+          {formatDecimalHours(day.totals.D)} h of driving on one calendar day is legal here: it spans two duty periods
+          with a 10-hour rest between them, and the 11-hour limit applies per duty period.
         </p>
       )}
 
-      <div className="overflow-x-auto p-4 sm:p-6 print:overflow-visible print:p-0">
+      <div className="mt-6 overflow-x-auto rounded-card border border-line print:mt-0 print:overflow-visible print:rounded-none print:border-0">
         {days.map((d, i) => (
           <div
             key={d.date}
             role="tabpanel"
             id={`log-panel-${i}`}
             aria-labelledby={`log-tab-${i}`}
-            className={`log-page min-w-[720px] overflow-hidden rounded-xl ring-1 ring-line print:min-w-0 print:rounded-none print:ring-0 ${i === active ? '' : 'hidden print:block'}`}
+            className={`log-page min-w-[720px] print:min-w-0 ${i === active ? '' : 'hidden print:block'}`}
           >
             <LogSheet log={d} meta={meta} dayCount={days.length} />
           </div>
         ))}
       </div>
+      <p className="mt-3 text-[13px] text-subtle print:hidden">
+        Every sheet totals exactly 24 hours. Hover the grid for exact times; use ← → to change day.
+      </p>
     </section>
   )
 }

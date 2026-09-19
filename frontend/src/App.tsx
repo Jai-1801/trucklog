@@ -78,30 +78,24 @@ export default function App() {
 
   return (
     <div className="flex min-h-dvh flex-col">
-      <header className="sticky top-0 z-[1100] border-b border-line bg-surface/85 backdrop-blur-md print:hidden">
-        <div className="mx-auto flex h-16 w-full max-w-[1400px] items-center gap-3 px-4 sm:px-6 lg:px-8">
+      <header className="border-b border-line print:hidden">
+        <div className="mx-auto flex h-14 w-full max-w-[1200px] items-center px-6 lg:px-10">
           <button
             type="button"
             onClick={() => (plan ? edit() : window.scrollTo({ top: 0 }))}
-            className="flex items-center gap-3 rounded-xl"
-            aria-label="TruckLog home"
+            className="flex items-center gap-2 text-[15px] font-semibold tracking-[-0.01em]"
           >
-            <span className="grid size-9 place-items-center rounded-xl bg-accent text-white shadow-[0_4px_12px_rgb(37_99_235/0.3)]">
-              <Truck className="size-[18px]" aria-hidden />
-            </span>
-            <span className="text-left leading-tight">
-              <span className="block text-[15px] font-extrabold tracking-tight">TruckLog</span>
-              <span className="hidden text-xs font-medium text-muted sm:block">Trip planner &amp; FMCSA daily logs</span>
-            </span>
+            <Truck className="size-[18px] text-accent" strokeWidth={2.2} aria-hidden />
+            TruckLog
           </button>
           <a
             href="https://github.com/Jai-1801/trucklog"
             target="_blank"
             rel="noreferrer"
-            className="ml-auto inline-flex h-9 items-center gap-2 rounded-xl px-3 text-[13px] font-semibold text-muted transition hover:bg-canvas hover:text-ink"
+            className="ml-auto inline-flex items-center gap-2 text-sm font-medium text-muted transition-colors hover:text-ink"
           >
             <GithubMark className="size-4" />
-            <span className="hidden sm:inline">Source code</span>
+            <span className="hidden sm:inline">GitHub</span>
           </a>
         </div>
       </header>
@@ -125,9 +119,11 @@ export default function App() {
 
       {mutation.isPending && <Preloader route={lastRequest ? routeLabel(lastRequest) : undefined} />}
 
-      <footer className="border-t border-line py-6 text-center text-[13px] text-subtle print:hidden">
-        Planning aid based on the FMCSA Interstate Truck Driver’s Guide to Hours of Service · Routing by
-        OpenRouteService
+      <footer className="border-t border-line print:hidden">
+        <p className="mx-auto max-w-[1200px] px-6 py-6 text-[13px] text-subtle lg:px-10">
+          Planning aid based on the FMCSA Interstate Truck Driver’s Guide to Hours of Service. Routing by
+          OpenRouteService.
+        </p>
       </footer>
     </div>
   )

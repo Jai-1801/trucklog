@@ -107,7 +107,7 @@ export function RouteMap({ plan, activeStopId, onStopHover }: Props) {
       {line.length > 1 && (
         <>
           <Polyline positions={line} pathOptions={{ color: '#ffffff', weight: 8, opacity: 0.9 }} />
-          <Polyline positions={line} pathOptions={{ color: '#2563eb', weight: 4.5, opacity: 0.95 }} />
+          <Polyline positions={line} pathOptions={{ color: '#ea580c', weight: 4.5, opacity: 0.95 }} />
         </>
       )}
       {stops.map((stop) => (

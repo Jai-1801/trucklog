@@ -3,7 +3,7 @@ import { formatClock, formatDecimalHours } from '../../lib/format'
 import type { DailyLog, DutyStatus, Remark, RemarkKind } from '../../lib/types'
 
 // Drawn to match the FMCSA paper "Driver's Daily Log" (docs/reference: blank-paper-log.png).
-// Printed form = ink; everything the driver fills in = pen blue, like a real paper log.
+// Printed form = ink; everything filled in from the plan = the accent colour, like pen on paper.
 
 export type SheetMeta = {
   carrier: string
@@ -27,10 +27,11 @@ const ROWS_BOTTOM = ROWS_TOP + 4 * ROW_H
 const TOTAL_X = 935
 const REMARKS_BOTTOM = 548
 
-const INK = '#0f172a'
-const RULE = '#334155'
-const FAINT = '#94a3b8'
-const PEN = '#1d4ed8'
+const INK = '#1c1917'
+const RULE = '#44403c'
+const FAINT = '#a8a29e'
+const PEN = '#c2410c'
+const CAPTION = '#57534e'
 
 const ROWS: { status: DutyStatus; label: [string, string?] }[] = [
   { status: 'OFF', label: ['1. Off Duty'] },
@@ -60,7 +61,7 @@ function Text({
   weight = 400,
   fill = INK,
   anchor = 'start',
-  mono = false,
+  numeric = false,
   ...pos
 }: {
   x: number
@@ -70,7 +71,7 @@ function Text({
   weight?: number
   fill?: string
   anchor?: 'start' | 'middle' | 'end'
-  mono?: boolean
+  numeric?: boolean
 }) {
   return (
     <text
@@ -79,7 +80,8 @@ function Text({
       fontWeight={weight}
       fill={fill}
       textAnchor={anchor}
-      fontFamily={mono ? 'var(--font-mono)' : 'var(--font-sans)'}
+      fontFamily="var(--font-sans)"
+      style={numeric ? { fontVariantNumeric: 'tabular-nums' } : undefined}
     >
       {children}
     </text>
@@ -94,7 +96,7 @@ function Field({ x0, x1, y, value, caption }: { x0: number; x1: number; y: numbe
         {value}
       </Text>
       <line x1={x0} x2={x1} y1={y} y2={y} stroke={RULE} strokeWidth={0.8} />
-      <Text x={(x0 + x1) / 2} y={y + 12} size={8.5} anchor="middle" fill="#475569">
+      <Text x={(x0 + x1) / 2} y={y + 12} size={8.5} anchor="middle" fill={CAPTION}>
         {caption}
       </Text>
     </g>
@@ -176,10 +178,10 @@ export function LogSheet({ log, meta, dayCount }: { log: DailyLog; meta: SheetMe
       ].map(({ x0, label }) => (
         <g key={label}>
           <rect x={x0} y={98} width={146} height={34} fill="none" stroke={RULE} strokeWidth={0.9} />
-          <Text x={x0 + 73} y={121} size={15} fill={PEN} anchor="middle" mono weight={500}>
+          <Text x={x0 + 73} y={121} size={15} fill={PEN} anchor="middle" numeric weight={500}>
             {Math.round(log.total_miles_driving).toLocaleString()}
           </Text>
-          <Text x={x0 + 73} y={145} size={8.5} anchor="middle" fill="#475569">
+          <Text x={x0 + 73} y={145} size={8.5} anchor="middle" fill={CAPTION}>
             {label}
           </Text>
         </g>
@@ -238,7 +240,7 @@ export function LogSheet({ log, meta, dayCount }: { log: DailyLog; meta: SheetMe
               return <line key={q} x1={qx} x2={qx} y1={top} y2={top + len} stroke={q % 4 === 0 ? RULE : FAINT} strokeWidth={q % 4 === 0 ? 0.8 : 0.6} />
             })}
             <line x1={GRID_R + 14} x2={GRID_R + 96} y1={top + ROW_H - 3} y2={top + ROW_H - 3} stroke={RULE} strokeWidth={0.8} />
-            <Text x={TOTAL_X} y={top + ROW_H - 8} size={13} fill={PEN} anchor="middle" mono weight={500}>
+            <Text x={TOTAL_X} y={top + ROW_H - 8} size={13} fill={PEN} anchor="middle" numeric weight={500}>
               {formatDecimalHours(log.totals[status])}
             </Text>
           </g>
@@ -247,7 +249,7 @@ export function LogSheet({ log, meta, dayCount }: { log: DailyLog; meta: SheetMe
       <Text x={TOTAL_X - 38} y={ROWS_BOTTOM + 18} size={12} fill={RULE}>
         =
       </Text>
-      <Text x={TOTAL_X} y={ROWS_BOTTOM + 18} size={13} fill={PEN} anchor="middle" mono weight={600}>
+      <Text x={TOTAL_X} y={ROWS_BOTTOM + 18} size={13} fill={PEN} anchor="middle" numeric weight={600}>
         {formatDecimalHours(total)}
       </Text>
 
@@ -346,12 +348,12 @@ function Recap({ log }: { log: DailyLog }) {
   const r = log.recap
   const col = (cx: number, value: string, lines: string[], muted = false) => (
     <g>
-      <Text x={cx} y={top + 26} size={14} fill={muted ? FAINT : PEN} anchor="middle" mono weight={600}>
+      <Text x={cx} y={top + 26} size={14} fill={muted ? FAINT : PEN} anchor="middle" numeric weight={600}>
         {value}
       </Text>
       <line x1={cx - 42} x2={cx + 42} y1={top + 30} y2={top + 30} stroke={RULE} strokeWidth={0.8} />
       {lines.map((line, i) => (
-        <Text key={line} x={cx} y={top + 44 + i * 11} size={8.5} anchor="middle" fill={muted ? FAINT : '#334155'}>
+        <Text key={line} x={cx} y={top + 44 + i * 11} size={8.5} anchor="middle" fill={muted ? FAINT : CAPTION}>
           {line}
         </Text>
       ))}

@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowLeft, ArrowRight, Check, FileText, Link2, Printer } from 'lucide-react'
+import { ArrowLeft, Check, Link2, Printer } from 'lucide-react'
 import { type KeyboardEvent, useState } from 'react'
 import type { TripPlan } from '../../lib/types'
 import { LogSheets } from '../eld-log/LogSheets'
@@ -9,6 +9,9 @@ import { TripSummary } from '../summary/TripSummary'
 
 type Tab = 'route' | 'logs' | 'rules'
 
+const secondaryButton =
+  'inline-flex h-9 items-center gap-2 rounded-field border border-line-strong px-3.5 text-sm font-medium transition-colors hover:bg-canvas'
+
 export function ResultsView({ plan, onEdit }: { plan: TripPlan; onEdit: () => void }) {
   const [tab, setTab] = useState<Tab>('route')
   const [activeStopId, setActiveStopId] = useState<string | null>(null)
@@ -16,9 +19,9 @@ export function ResultsView({ plan, onEdit }: { plan: TripPlan; onEdit: () => vo
   const { current, pickup, dropoff } = plan.places
   const sheets = plan.days.length
 
-  const tabs: { id: Tab; label: string; badge?: number }[] = [
-    { id: 'route', label: 'Route & stops' },
-    { id: 'logs', label: 'Daily logs', badge: sheets },
+  const tabs: { id: Tab; label: string }[] = [
+    { id: 'route', label: 'Route and stops' },
+    { id: 'logs', label: `Daily logs (${sheets})` },
     { id: 'rules', label: 'How it’s planned' },
   ]
 
@@ -39,61 +42,43 @@ export function ResultsView({ plan, onEdit }: { plan: TripPlan; onEdit: () => vo
   }
 
   return (
-    <div className="mx-auto w-full max-w-[1400px] px-4 pt-6 pb-16 sm:px-6 lg:px-8 lg:pt-8 print:p-0">
-      {/* Trip header */}
+    <div className="mx-auto w-full max-w-[1200px] px-6 py-8 lg:px-10 lg:py-12 print:p-0">
       <div className="print:hidden">
         <button
           type="button"
           onClick={onEdit}
-          className="inline-flex items-center gap-1.5 rounded-lg py-1 text-sm font-semibold text-muted transition hover:text-accent"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted transition-colors hover:text-ink"
         >
           <ArrowLeft className="size-4" aria-hidden /> Edit trip
         </button>
-        <div className="mt-3 flex flex-wrap items-end justify-between gap-4">
-          <h1 className="min-w-0 text-2xl leading-tight font-extrabold tracking-tight sm:text-[30px]">
-            {current.short} <span className="font-semibold text-subtle">→</span> {pickup.short}{' '}
-            <span className="font-semibold text-subtle">→</span> {dropoff.short}
+
+        <div className="mt-4 flex flex-wrap items-start justify-between gap-x-8 gap-y-4">
+          <h1 className="min-w-0 text-[26px] leading-tight font-semibold tracking-[-0.02em] sm:text-[30px]">
+            {current.short} <span className="text-subtle">→</span> {pickup.short} <span className="text-subtle">→</span>{' '}
+            {dropoff.short}
           </h1>
           <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={share}
-              className="inline-flex h-10 items-center gap-2 rounded-xl border border-line bg-surface px-4 text-sm font-semibold transition hover:border-line-strong"
-            >
+            <button type="button" onClick={share} className={secondaryButton}>
               {copied ? <Check className="size-4 text-pin-pickup" aria-hidden /> : <Link2 className="size-4" aria-hidden />}
-              {copied ? 'Copied' : 'Share'}
+              {copied ? 'Link copied' : 'Share link'}
             </button>
-            <button
-              type="button"
-              onClick={() => window.print()}
-              className="inline-flex h-10 items-center gap-2 rounded-xl bg-ink px-4 text-sm font-semibold text-white transition hover:bg-ink/90"
-            >
+            <button type="button" onClick={() => window.print()} className={secondaryButton}>
               <Printer className="size-4" aria-hidden /> Print logs
             </button>
           </div>
         </div>
 
-        <div className="mt-6">
+        <div className="mt-8">
           <TripSummary plan={plan} />
         </div>
+
         {plan.warnings.map((warning) => (
-          <p
-            key={warning}
-            role="status"
-            className="mt-3 flex items-start gap-3 rounded-2xl border border-status-on/30 bg-status-on/8 px-5 py-3.5 text-sm font-medium"
-          >
-            <AlertTriangle className="mt-0.5 size-4 shrink-0 text-status-on" aria-hidden />
+          <p key={warning} role="status" className="mt-4 border-l-2 border-accent bg-accent-soft px-4 py-3 text-sm">
             {warning}
           </p>
         ))}
 
-        {/* Tabs */}
-        <div
-          role="tablist"
-          aria-label="Trip plan"
-          onKeyDown={onTabKey}
-          className="mt-8 flex gap-6 overflow-x-auto border-b border-line"
-        >
+        <div role="tablist" aria-label="Trip plan" onKeyDown={onTabKey} className="mt-10 flex gap-8 overflow-x-auto border-b border-line">
           {tabs.map((t) => (
             <button
               key={t.id}
@@ -103,18 +88,11 @@ export function ResultsView({ plan, onEdit }: { plan: TripPlan; onEdit: () => vo
               aria-controls={`panel-${t.id}`}
               tabIndex={tab === t.id ? 0 : -1}
               onClick={() => setTab(t.id)}
-              className={`-mb-px flex shrink-0 items-center gap-2 border-b-2 pt-1 pb-3.5 text-[15px] font-bold transition-colors ${
+              className={`-mb-px shrink-0 border-b-2 pb-3 text-[15px] font-medium transition-colors ${
                 tab === t.id ? 'border-accent text-ink' : 'border-transparent text-muted hover:text-ink'
               }`}
             >
               {t.label}
-              {t.badge !== undefined && (
-                <span
-                  className={`rounded-full px-2 py-0.5 text-xs ${tab === t.id ? 'bg-accent text-white' : 'bg-canvas text-muted ring-1 ring-line'}`}
-                >
-                  {t.badge}
-                </span>
-              )}
             </button>
           ))}
         </div>
@@ -125,47 +103,39 @@ export function ResultsView({ plan, onEdit }: { plan: TripPlan; onEdit: () => vo
         role="tabpanel"
         id="panel-route"
         aria-labelledby="tab-route"
-        className={`mt-6 space-y-6 print:hidden ${tab === 'route' ? '' : 'hidden'}`}
+        className={`mt-8 print:hidden ${tab === 'route' ? '' : 'hidden'}`}
       >
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_380px]">
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
           <section
             aria-label="Route map"
-            className="relative h-[58vh] min-h-[380px] overflow-hidden rounded-2xl border border-line bg-surface lg:h-[600px]"
+            className="relative h-[56vh] min-h-[360px] overflow-hidden rounded-card border border-line lg:h-[560px]"
           >
             <RouteMap plan={plan} activeStopId={activeStopId} onStopHover={setActiveStopId} />
           </section>
-          <div className="lg:h-[600px]">
+          <div className="lg:h-[560px]">
             <Itinerary plan={plan} activeStopId={activeStopId} onStopHover={setActiveStopId} />
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => {
-            setTab('logs')
-            window.scrollTo({ top: 0, behavior: 'smooth' })
-          }}
-          className="group flex w-full items-center gap-4 rounded-2xl border border-accent/20 bg-accent-soft p-5 text-left transition hover:border-accent/40"
-        >
-          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-accent text-white">
-            <FileText className="size-5" aria-hidden />
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-[15px] font-bold">
-              {sheets} daily log sheet{sheets === 1 ? ' is' : 's are'} ready
-            </span>
-            <span className="block text-sm text-muted">Filled in from this plan, one per calendar day.</span>
-          </span>
-          <span className="inline-flex shrink-0 items-center gap-1.5 text-sm font-bold text-accent-strong">
-            View logs <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
-          </span>
-        </button>
+        <p className="mt-6 text-sm text-muted">
+          {sheets} daily log sheet{sheets === 1 ? ' is' : 's are'} filled in from this plan.{' '}
+          <button
+            type="button"
+            onClick={() => {
+              setTab('logs')
+              window.scrollTo({ top: 0, behavior: 'smooth' })
+            }}
+            className="font-semibold text-accent-strong hover:underline"
+          >
+            View daily logs
+          </button>
+        </p>
       </div>
 
       <div
         role="tabpanel"
         id="panel-logs"
         aria-labelledby="tab-logs"
-        className={`mt-6 print:mt-0 print:block ${tab === 'logs' ? '' : 'hidden'}`}
+        className={`mt-8 print:mt-0 print:block ${tab === 'logs' ? '' : 'hidden'}`}
       >
         <LogSheets plan={plan} />
       </div>
@@ -174,7 +144,7 @@ export function ResultsView({ plan, onEdit }: { plan: TripPlan; onEdit: () => vo
         role="tabpanel"
         id="panel-rules"
         aria-labelledby="tab-rules"
-        className={`mt-6 print:hidden ${tab === 'rules' ? '' : 'hidden'}`}
+        className={`mt-8 print:hidden ${tab === 'rules' ? '' : 'hidden'}`}
       >
         <Assumptions items={plan.assumptions} />
       </div>
