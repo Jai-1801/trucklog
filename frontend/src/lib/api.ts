@@ -22,7 +22,8 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
   try {
     response = await fetch(`${API_BASE}${path}`, {
       ...init,
-      headers: { 'Content-Type': 'application/json', ...init?.headers },
+      // JSON header only when sending a body: a bare GET then skips the CORS preflight
+      headers: init?.body ? { 'Content-Type': 'application/json', ...init.headers } : init?.headers,
     })
   } catch {
     throw new ApiError(0, { code: 'NETWORK_ERROR', message: 'Could not reach the server. Check your connection and try again.' })
