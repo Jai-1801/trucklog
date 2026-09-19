@@ -62,6 +62,7 @@ The expected values below were measured on the live app. Miles can move by a few
 | Cycle hours used | 0 |
 
 **Expect**
+
 - About **221 mi**, **6h 15m driving**, **8h 15m on duty**, **1 day**.
 - "No rests needed". The itinerary shows drive → pickup → drive → dropoff only.
 - One log sheet totalling **24 h**.
@@ -77,9 +78,11 @@ The expected values below were measured on the live app. Miles can move by a few
 | Departure | a future date, 06:00 |
 
 **Expect: summary**
+
 - About **964–971 mi**, **22h 30m driving**, **3 days**, **1 break, 2 rests**.
 
 **Expect: itinerary**
+
 - Drive about 301 mi to St. Louis, then pickup (1 h on duty).
 - Driving stops after 11 h in total, then a **10-hr sleeper-berth rest**.
 - The next day, a **30-minute break** after 8 h of driving.
@@ -109,6 +112,7 @@ The expected values below were measured on the live app. Miles can move by a few
 | Cycle hours used | 62 |
 
 **Expect**
+
 - About **1,401 mi**, **33h 30m driving**, **5 days**.
 - Stops: **1 fuel stop, 1 break, 2 rests, 1 restart**.
 - An orange notice: "The 70-hr cycle runs out mid-trip, so the plan includes a 34-hr restart".
@@ -126,6 +130,7 @@ The expected values below were measured on the live app. Miles can move by a few
 | Cycle hours used | 30 |
 
 **Expect**
+
 - About **2,810 mi**, **65h 15m driving**, **7 days**.
 - **2 fuel stops**, each before 1,000 miles since the last one, and 30 min on duty.
 - 3 breaks, 5 rests, 1 restart.
@@ -139,12 +144,14 @@ The expected values below were measured on the live app. Miles can move by a few
 2. Enter a driver name, carrier, truck/trailer numbers and a BOL number.
 
 **Expect**
+
 - Each value appears on the sheet as you type, in the right box (see section 2), on **every** day's sheet.
 - Fields you left empty stay as blank lines.
 
 3. Reload the page and plan a new trip.
 
 **Expect**
+
 - The driver, carrier, offices and truck are still filled in; the BOL and shipper are empty again.
 
 **Why it matters:** the sheets are ready to sign and hand over, not a mock-up. The driver sets carrier, truck and name once, not on every trip, and enters shipping details per load, as in real life.
