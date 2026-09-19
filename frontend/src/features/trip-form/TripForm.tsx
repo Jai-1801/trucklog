@@ -1,15 +1,18 @@
-import { CircleDot, Clock, Flag, Loader2, Package, Route } from 'lucide-react'
-import { type FormEvent, useState } from 'react'
+import { ArrowRight, CircleDot, Clock, Flag, Loader2, Package } from 'lucide-react'
+import { type FormEvent, type ReactNode, useState } from 'react'
 import { nextQuarterHourLocal } from '../../lib/format'
-import type { PlaceInput, PlanRequest } from '../../lib/types'
 import { displayText } from '../../lib/place'
+import type { PlaceInput, PlanRequest } from '../../lib/types'
 import { LocationInput } from './LocationInput'
 import { SAMPLES, type Sample } from './samples'
 
 type FieldErrors = Partial<Record<keyof PlanRequest, string>>
 
 type Props = {
+  /** Starting values. The parent remounts the form (new `key`) to load a sample or shared link. */
+  initial?: PlanRequest
   onSubmit: (request: PlanRequest) => void
+  onSample: (sample: Sample) => void
   pending: boolean
   serverErrors?: Record<string, unknown>
 }
@@ -21,49 +24,47 @@ function firstMessage(value: unknown): string | undefined {
   return undefined
 }
 
-export function TripForm({ onSubmit, pending, serverErrors }: Props) {
-  const [current, setCurrent] = useState<PlaceInput>({})
-  const [pickup, setPickup] = useState<PlaceInput>({})
-  const [dropoff, setDropoff] = useState<PlaceInput>({})
-  const [cycle, setCycle] = useState('0')
-  const [startAt, setStartAt] = useState(nextQuarterHourLocal)
+function Section({ title, description, children }: { title: string; description: string; children: ReactNode }) {
+  return (
+    <fieldset className="space-y-5">
+      <legend className="mb-5">
+        <span className="block text-xs font-bold tracking-[0.08em] text-subtle uppercase">{title}</span>
+        <span className="mt-1 block text-[13px] text-muted">{description}</span>
+      </legend>
+      {children}
+    </fieldset>
+  )
+}
+
+export function TripForm({ initial, onSubmit, onSample, pending, serverErrors }: Props) {
+  const [current, setCurrent] = useState<PlaceInput>(initial?.current_location ?? {})
+  const [pickup, setPickup] = useState<PlaceInput>(initial?.pickup_location ?? {})
+  const [dropoff, setDropoff] = useState<PlaceInput>(initial?.dropoff_location ?? {})
+  const [cycle, setCycle] = useState(String(initial?.current_cycle_used_hrs ?? 0))
+  const [startAt, setStartAt] = useState(() => initial?.start_at ?? nextQuarterHourLocal())
   const [errors, setErrors] = useState<FieldErrors>({})
 
   const fieldError = (field: keyof PlanRequest) => errors[field] ?? firstMessage(serverErrors?.[field])
 
-  const build = (c: PlaceInput, p: PlaceInput, d: PlaceInput, cyc: string): PlanRequest | null => {
-    const next: FieldErrors = {}
-    if (!displayText(c).trim()) next.current_location = 'Where is the truck now?'
-    if (!displayText(p).trim()) next.pickup_location = 'Where is the pickup?'
-    if (!displayText(d).trim()) next.dropoff_location = 'Where is the dropoff?'
-    const hours = Number(cyc)
-    if (cyc.trim() === '' || !Number.isFinite(hours) || hours < 0 || hours > 70) {
-      next.current_cycle_used_hrs = 'Enter 0 to 70 hours.'
-    }
-    setErrors(next)
-    if (Object.keys(next).length > 0) return null
-    return {
-      current_location: c,
-      pickup_location: p,
-      dropoff_location: d,
-      current_cycle_used_hrs: hours,
-      start_at: startAt || undefined,
-    }
-  }
-
   const submit = (e: FormEvent) => {
     e.preventDefault()
-    const request = build(current, pickup, dropoff, cycle)
-    if (request) onSubmit(request)
-  }
-
-  const runSample = (sample: Sample) => {
-    setCurrent(sample.current)
-    setPickup(sample.pickup)
-    setDropoff(sample.dropoff)
-    setCycle(String(sample.cycle))
-    const request = build(sample.current, sample.pickup, sample.dropoff, String(sample.cycle))
-    if (request) onSubmit(request)
+    const next: FieldErrors = {}
+    if (!displayText(current).trim()) next.current_location = 'Where is the truck right now?'
+    if (!displayText(pickup).trim()) next.pickup_location = 'Where do you load?'
+    if (!displayText(dropoff).trim()) next.dropoff_location = 'Where do you unload?'
+    const hours = Number(cycle)
+    if (cycle.trim() === '' || !Number.isFinite(hours) || hours < 0 || hours > 70) {
+      next.current_cycle_used_hrs = 'Enter a number from 0 to 70.'
+    }
+    setErrors(next)
+    if (Object.keys(next).length > 0) return
+    onSubmit({
+      current_location: current,
+      pickup_location: pickup,
+      dropoff_location: dropoff,
+      current_cycle_used_hrs: hours,
+      start_at: startAt || undefined,
+    })
   }
 
   const clear = (field: keyof PlanRequest) =>
@@ -72,14 +73,16 @@ export function TripForm({ onSubmit, pending, serverErrors }: Props) {
       delete next[field]
       return next
     })
+
   const cycleNumber = Math.min(70, Math.max(0, Number(cycle) || 0))
+  const hoursLeft = (70 - cycleNumber).toFixed(2).replace(/\.?0+$/, '')
 
   return (
-    <form onSubmit={submit} noValidate className="space-y-4">
-      <div className="relative space-y-3">
+    <form onSubmit={submit} noValidate className="space-y-8">
+      <Section title="Route" description="Where the truck is, and where it loads and unloads.">
         <LocationInput
           label="Current location"
-          icon={<CircleDot className="size-4" />}
+          icon={<CircleDot className="size-[18px] text-ink" />}
           placeholder="City, state or address"
           value={current}
           onChange={(v) => {
@@ -90,7 +93,8 @@ export function TripForm({ onSubmit, pending, serverErrors }: Props) {
         />
         <LocationInput
           label="Pickup"
-          icon={<Package className="size-4" />}
+          hint="1 h on duty"
+          icon={<Package className="size-[18px] text-pin-pickup" />}
           placeholder="Where you load"
           value={pickup}
           onChange={(v) => {
@@ -101,7 +105,8 @@ export function TripForm({ onSubmit, pending, serverErrors }: Props) {
         />
         <LocationInput
           label="Dropoff"
-          icon={<Flag className="size-4" />}
+          hint="1 h on duty"
+          icon={<Flag className="size-[18px] text-ink" />}
           placeholder="Where you unload"
           value={dropoff}
           onChange={(v) => {
@@ -110,100 +115,113 @@ export function TripForm({ onSubmit, pending, serverErrors }: Props) {
           }}
           error={fieldError('dropoff_location')}
         />
-      </div>
+      </Section>
 
-      <div>
-        <div className="mb-1.5 flex items-baseline justify-between">
-          <label htmlFor="cycle" className="text-xs font-medium text-muted">
-            Current cycle used
-          </label>
-          <span className="text-xs text-muted">
-            <span className="font-mono tabular-nums text-ink">{(70 - cycleNumber).toFixed(2).replace(/\.00$/, '')}</span> h
-            left of 70
-          </span>
-        </div>
-        <div className="flex items-center gap-3">
-          <input
-            aria-label="Cycle hours used (slider)"
-            type="range"
-            min={0}
-            max={70}
-            step={0.25}
-            value={cycleNumber}
-            onChange={(e) => {
-              setCycle(e.target.value)
-              clear('current_cycle_used_hrs')
-            }}
-            className="h-1.5 flex-1 cursor-pointer accent-accent"
-          />
-          <div
-            className={`flex w-24 items-center rounded-lg border bg-surface pr-2.5 focus-within:border-accent focus-within:ring-3 focus-within:ring-accent/15 ${
-              fieldError('current_cycle_used_hrs') ? 'border-status-restart' : 'border-line'
-            }`}
-          >
+      <div className="h-px bg-line" aria-hidden />
+
+      <Section title="Driver status" description="On-duty hours already used in the current 70-hour / 8-day cycle.">
+        <div>
+          <div className="mb-3 flex items-baseline justify-between gap-3">
+            <label htmlFor="cycle" className="text-sm font-semibold">
+              Cycle hours used
+            </label>
+            <span className="text-[13px] text-muted">
+              <span className="font-semibold text-ink tabular-nums">{hoursLeft} h</span> left in cycle
+            </span>
+          </div>
+          <div className="flex items-center gap-4">
             <input
-              id="cycle"
-              type="number"
-              inputMode="decimal"
+              aria-label="Cycle hours used (slider)"
+              type="range"
               min={0}
               max={70}
               step={0.25}
-              value={cycle}
+              value={cycleNumber}
               onChange={(e) => {
                 setCycle(e.target.value)
                 clear('current_cycle_used_hrs')
               }}
-              className="h-10 w-full min-w-0 bg-transparent pl-3 font-mono text-sm tabular-nums outline-none"
+              className="h-2 flex-1 cursor-pointer accent-accent"
             />
-            <span className="text-xs text-muted">hrs</span>
+            <div
+              className={`flex w-28 items-center rounded-field border bg-surface pr-3.5 transition-[border-color,box-shadow] focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/12 ${
+                fieldError('current_cycle_used_hrs') ? 'border-status-restart' : 'border-line'
+              }`}
+            >
+              <input
+                id="cycle"
+                type="number"
+                inputMode="decimal"
+                min={0}
+                max={70}
+                step={0.25}
+                value={cycle}
+                onChange={(e) => {
+                  setCycle(e.target.value)
+                  clear('current_cycle_used_hrs')
+                }}
+                className="h-12 w-full min-w-0 bg-transparent pl-4 text-[15px] font-semibold tabular-nums outline-none"
+              />
+              <span className="text-[13px] text-subtle">hrs</span>
+            </div>
           </div>
+          {fieldError('current_cycle_used_hrs') && (
+            <p className="mt-2 text-[13px] font-medium text-status-restart">{fieldError('current_cycle_used_hrs')}</p>
+          )}
         </div>
-        {fieldError('current_cycle_used_hrs') && (
-          <p className="mt-1 text-xs text-status-restart">{fieldError('current_cycle_used_hrs')}</p>
-        )}
-      </div>
 
-      <div>
-        <label htmlFor="start" className="mb-1.5 block text-xs font-medium text-muted">
-          Trip start <span className="font-normal">(local time at current location)</span>
-        </label>
-        <div className="flex items-center gap-2 rounded-lg border border-line bg-surface px-3 focus-within:border-accent focus-within:ring-3 focus-within:ring-accent/15">
-          <Clock className="size-4 shrink-0 text-muted" aria-hidden />
-          <input
-            id="start"
-            type="datetime-local"
-            step={900}
-            value={startAt}
-            onChange={(e) => setStartAt(e.target.value)}
-            className="h-10 w-full min-w-0 bg-transparent text-sm tabular-nums outline-none"
-          />
+        <div>
+          <label htmlFor="start" className="mb-2 flex items-baseline justify-between gap-2 text-sm font-semibold">
+            Departure
+            <span className="text-xs font-medium text-subtle">local time at current location</span>
+          </label>
+          <div className="flex items-center gap-3 rounded-field border border-line bg-surface px-4 transition-[border-color,box-shadow] hover:border-line-strong focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/12">
+            <Clock className="size-[18px] shrink-0 text-muted" aria-hidden />
+            <input
+              id="start"
+              type="datetime-local"
+              step={900}
+              value={startAt}
+              onChange={(e) => setStartAt(e.target.value)}
+              className="h-12 w-full min-w-0 bg-transparent text-[15px] font-medium tabular-nums outline-none"
+            />
+          </div>
+          {fieldError('start_at') && (
+            <p className="mt-2 text-[13px] font-medium text-status-restart">{fieldError('start_at')}</p>
+          )}
         </div>
-        {fieldError('start_at') && <p className="mt-1 text-xs text-status-restart">{fieldError('start_at')}</p>}
-      </div>
+      </Section>
 
       <button
         type="submit"
         disabled={pending}
-        className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-accent text-sm font-semibold text-white shadow-sm shadow-accent/30 transition hover:bg-accent-strong focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent disabled:cursor-wait disabled:opacity-80"
+        className="group flex h-13 w-full items-center justify-center gap-2 rounded-field bg-accent text-[15px] font-bold text-white shadow-[0_6px_20px_rgb(37_99_235/0.28)] transition hover:bg-accent-strong active:translate-y-px disabled:cursor-wait disabled:opacity-80"
       >
-        {pending ? <Loader2 className="size-4 animate-spin" aria-hidden /> : <Route className="size-4" aria-hidden />}
-        {pending ? 'Planning trip…' : 'Plan trip'}
+        {pending ? (
+          <>
+            <Loader2 className="size-5 animate-spin" aria-hidden /> Planning your trip…
+          </>
+        ) : (
+          <>
+            Plan trip &amp; draw logs
+            <ArrowRight className="size-5 transition-transform group-hover:translate-x-0.5" aria-hidden />
+          </>
+        )}
       </button>
 
       <div>
-        <p className="mb-2 text-xs font-medium text-muted">Or try a sample trip</p>
-        <div className="grid grid-cols-2 gap-2">
+        <p className="mb-3 text-xs font-bold tracking-[0.08em] text-subtle uppercase">Or load a sample</p>
+        <div className="flex flex-wrap gap-2">
           {SAMPLES.map((sample) => (
             <button
               key={sample.name}
               type="button"
               disabled={pending}
-              onClick={() => runSample(sample)}
-              title={sample.hint}
-              className="rounded-lg border border-line bg-surface px-3 py-2 text-left transition hover:border-accent/50 hover:bg-accent/5 focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-60"
+              onClick={() => onSample(sample)}
+              title={`${sample.route}: ${sample.shows}`}
+              className="rounded-full border border-line bg-surface px-3.5 py-2 text-[13px] font-semibold text-muted transition hover:border-accent/40 hover:bg-accent-soft hover:text-accent-strong disabled:opacity-50"
             >
-              <span className="block text-xs font-semibold">{sample.name}</span>
-              <span className="block truncate text-[11px] text-muted">{sample.hint}</span>
+              {sample.name}
             </button>
           ))}
         </div>

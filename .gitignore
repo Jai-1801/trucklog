@@ -20,3 +20,6 @@ dist/
 # local-only files (assessment brief is Spotter's private material; its requirements live in docs/BUILD.md)
 new-full-stack-dev-assessment.docx
 api.md.txt
+
+# personal talking notes, not part of the submission
+LOOM_SCRIPT.md

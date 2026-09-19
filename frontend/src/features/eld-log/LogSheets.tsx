@@ -35,37 +35,40 @@ export function LogSheets({ plan }: { plan: TripPlan }) {
   }
 
   return (
-    <section aria-labelledby="logs-title" className="print-area min-w-0 rounded-card border border-line bg-surface">
-      <header className="flex flex-wrap items-center gap-x-4 gap-y-2 border-b border-line px-4 py-3 print:hidden">
+    <section
+      aria-labelledby="logs-title"
+      className="print-area min-w-0 overflow-hidden rounded-card border border-line bg-surface shadow-[var(--shadow-card)]"
+    >
+      <header className="flex flex-wrap items-center gap-x-6 gap-y-3 border-b border-line px-6 py-5 print:hidden">
         <div className="mr-auto">
-          <h2 id="logs-title" className="text-sm font-semibold">
-            Driver’s daily logs
-          </h2>
-          <p className="flex items-center gap-1.5 text-xs text-muted">
-            {allBalanced && <CheckCircle2 className="size-3.5 text-pin-pickup" aria-hidden />}
-            {days.length} sheet{days.length > 1 ? 's' : ''} · every sheet totals 24 h
+          <h3 id="logs-title" className="text-[15px] font-bold">
+            {days.length} log sheet{days.length > 1 ? 's' : ''} for this trip
+          </h3>
+          <p className="mt-0.5 flex items-center gap-1.5 text-[13px] text-muted">
+            {allBalanced && <CheckCircle2 className="size-4 text-pin-pickup" aria-hidden />}
+            Every sheet totals exactly 24 hours · use ← → to switch days
           </p>
         </div>
         <button
           type="button"
           onClick={() => window.print()}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-line px-3 py-1.5 text-sm font-medium hover:bg-canvas focus-visible:outline-2 focus-visible:outline-accent"
+          className="inline-flex h-10 items-center gap-2 rounded-field border border-line px-4 text-sm font-semibold transition hover:border-line-strong hover:bg-canvas"
         >
           <Printer className="size-4" aria-hidden /> Print / Save PDF
         </button>
       </header>
 
-      <div className="flex items-center gap-2 border-b border-line px-2 py-2 print:hidden">
+      <div className="flex items-center gap-2 border-b border-line px-3 py-3 print:hidden">
         <button
           type="button"
           aria-label="Previous day"
           disabled={active === 0}
           onClick={() => go(active - 1)}
-          className="grid size-8 shrink-0 place-items-center rounded-lg text-muted hover:bg-canvas disabled:opacity-30"
+          className="grid size-10 shrink-0 place-items-center rounded-xl text-muted hover:bg-canvas disabled:opacity-30"
         >
           <ChevronLeft className="size-4" aria-hidden />
         </button>
-        <div role="tablist" aria-label="Log sheet days" onKeyDown={onKeyDown} className="flex min-w-0 flex-1 gap-1 overflow-x-auto">
+        <div role="tablist" aria-label="Log sheet days" onKeyDown={onKeyDown} className="flex min-w-0 flex-1 gap-1.5 overflow-x-auto">
           {days.map((d, i) => (
             <button
               key={d.date}
@@ -75,12 +78,12 @@ export function LogSheets({ plan }: { plan: TripPlan }) {
               aria-controls={`log-panel-${i}`}
               tabIndex={i === active ? 0 : -1}
               onClick={() => setActive(i)}
-              className={`shrink-0 rounded-lg px-3 py-1.5 text-left transition-colors ${
-                i === active ? 'bg-accent text-white shadow-sm shadow-accent/30' : 'text-muted hover:bg-canvas hover:text-ink'
+              className={`shrink-0 rounded-xl px-4 py-2.5 text-left transition-colors ${
+                i === active ? 'bg-ink text-white' : 'text-muted hover:bg-canvas hover:text-ink'
               }`}
             >
-              <span className="block text-xs font-semibold">Day {d.day_number}</span>
-              <span className={`block text-[11px] ${i === active ? 'text-white/80' : ''}`}>{formatDate(d.date)}</span>
+              <span className="block text-[13px] font-bold">Day {d.day_number}</span>
+              <span className={`block text-xs ${i === active ? 'text-white/70' : ''}`}>{formatDate(d.date)}</span>
             </button>
           ))}
         </div>
@@ -89,32 +92,32 @@ export function LogSheets({ plan }: { plan: TripPlan }) {
           aria-label="Next day"
           disabled={active === days.length - 1}
           onClick={() => go(active + 1)}
-          className="grid size-8 shrink-0 place-items-center rounded-lg text-muted hover:bg-canvas disabled:opacity-30"
+          className="grid size-10 shrink-0 place-items-center rounded-xl text-muted hover:bg-canvas disabled:opacity-30"
         >
           <ChevronRight className="size-4" aria-hidden />
         </button>
       </div>
 
-      <dl className="flex flex-wrap gap-x-5 gap-y-1 px-4 pt-3 text-xs print:hidden">
-        <div className="flex gap-1.5">
+      <dl className="flex flex-wrap gap-2 px-6 pt-5 text-[13px] print:hidden">
+        <div className="flex gap-1.5 rounded-full bg-canvas px-3 py-1.5 ring-1 ring-line">
           <dt className="text-muted">Miles</dt>
-          <dd className="font-mono font-medium tabular-nums">{Math.round(day.total_miles_driving).toLocaleString()}</dd>
+          <dd className="font-bold tabular-nums">{Math.round(day.total_miles_driving).toLocaleString()}</dd>
         </div>
         {ORDER.map((status) => (
-          <div key={status} className="flex items-center gap-1.5">
+          <div key={status} className="flex items-center gap-1.5 rounded-full bg-canvas px-3 py-1.5 ring-1 ring-line">
             <span className="size-2 rounded-full" style={{ background: STATUS_META[status].color }} aria-hidden />
             <dt className="text-muted">{STATUS_META[status].short}</dt>
-            <dd className="font-mono font-medium tabular-nums">{formatDecimalHours(day.totals[status])} h</dd>
+            <dd className="font-bold tabular-nums">{formatDecimalHours(day.totals[status])} h</dd>
           </div>
         ))}
-        <div className="flex gap-1.5">
-          <dt className="text-muted">Available tomorrow</dt>
-          <dd className="font-mono font-medium tabular-nums">{formatDecimalHours(day.recap.b_available_tomorrow)} h</dd>
+        <div className="flex gap-1.5 rounded-full bg-accent-soft px-3 py-1.5 ring-1 ring-accent/15">
+          <dt className="text-accent-strong/80">Available tomorrow</dt>
+          <dd className="font-bold text-accent-strong tabular-nums">{formatDecimalHours(day.recap.b_available_tomorrow)} h</dd>
         </div>
       </dl>
       {day.totals.D > 11 && (
-        <p className="mx-4 mt-2 flex items-start gap-1.5 rounded-lg bg-accent/6 px-3 py-2 text-xs text-ink print:hidden">
-          <Info className="mt-px size-3.5 shrink-0 text-accent" aria-hidden />
+        <p className="mx-6 mt-4 flex items-start gap-2.5 rounded-xl bg-accent-soft px-4 py-3 text-[13px] leading-relaxed print:hidden">
+          <Info className="mt-0.5 size-4 shrink-0 text-accent" aria-hidden />
           <span>
             {formatDecimalHours(day.totals.D)} h of driving on this calendar day is legal: it spans two duty periods with a
             10-hour rest between them. The 11-hour limit applies per duty period, not per calendar day.
@@ -122,14 +125,14 @@ export function LogSheets({ plan }: { plan: TripPlan }) {
         </p>
       )}
 
-      <div className="overflow-x-auto p-3 print:overflow-visible print:p-0">
+      <div className="overflow-x-auto p-4 sm:p-6 print:overflow-visible print:p-0">
         {days.map((d, i) => (
           <div
             key={d.date}
             role="tabpanel"
             id={`log-panel-${i}`}
             aria-labelledby={`log-tab-${i}`}
-            className={`log-page min-w-[720px] print:min-w-0 ${i === active ? '' : 'hidden print:block'}`}
+            className={`log-page min-w-[720px] overflow-hidden rounded-xl ring-1 ring-line print:min-w-0 print:rounded-none print:ring-0 ${i === active ? '' : 'hidden print:block'}`}
           >
             <LogSheet log={d} meta={meta} dayCount={days.length} />
           </div>

@@ -7,13 +7,14 @@ import type { Place, PlaceInput } from '../../lib/types'
 type Props = {
   label: string
   icon: ReactNode
+  hint?: string
   value: PlaceInput
   onChange: (value: PlaceInput) => void
   placeholder: string
   error?: string
 }
 
-export function LocationInput({ label, icon, value, onChange, placeholder, error }: Props) {
+export function LocationInput({ label, icon, hint, value, onChange, placeholder, error }: Props) {
   const id = useId()
   const listId = `${id}-list`
   const [suggestions, setSuggestions] = useState<Place[]>([])
@@ -70,15 +71,16 @@ export function LocationInput({ label, icon, value, onChange, placeholder, error
 
   return (
     <div className="relative">
-      <label htmlFor={id} className="mb-1.5 block text-xs font-medium text-muted">
+      <label htmlFor={id} className="mb-2 flex items-baseline justify-between gap-2 text-sm font-semibold text-ink">
         {label}
+        {hint && <span className="text-xs font-medium text-subtle">{hint}</span>}
       </label>
       <div
-        className={`flex items-center gap-2 rounded-lg border bg-surface px-3 transition-colors focus-within:border-accent focus-within:ring-3 focus-within:ring-accent/15 ${
+        className={`flex items-center gap-3 rounded-field border bg-surface px-4 transition-[border-color,box-shadow] hover:border-line-strong focus-within:border-accent focus-within:ring-4 focus-within:ring-accent/12 ${
           error ? 'border-status-restart' : 'border-line'
         }`}
       >
-        <span className="shrink-0 text-muted" aria-hidden>
+        <span className="shrink-0" aria-hidden>
           {icon}
         </span>
         <input
@@ -92,7 +94,7 @@ export function LocationInput({ label, icon, value, onChange, placeholder, error
           aria-describedby={error ? `${id}-error` : undefined}
           autoComplete="off"
           spellCheck={false}
-          className="h-10 w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted/70"
+          className="h-12 w-full min-w-0 bg-transparent text-[15px] font-medium outline-none placeholder:font-normal placeholder:text-subtle"
           placeholder={placeholder}
           value={text}
           onChange={(e) => {
@@ -106,7 +108,7 @@ export function LocationInput({ label, icon, value, onChange, placeholder, error
         {loading && <Loader2 className="size-4 shrink-0 animate-spin text-muted" aria-hidden />}
       </div>
       {error && (
-        <p id={`${id}-error`} className="mt-1 text-xs text-status-restart">
+        <p id={`${id}-error`} className="mt-2 text-[13px] font-medium text-status-restart">
           {error}
         </p>
       )}
@@ -114,7 +116,7 @@ export function LocationInput({ label, icon, value, onChange, placeholder, error
         <ul
           id={listId}
           role="listbox"
-          className="absolute z-[1000] mt-1 w-full overflow-hidden rounded-lg border border-line bg-surface py-1 shadow-lg shadow-ink/5"
+          className="absolute z-[1000] mt-2 w-full overflow-hidden rounded-field border border-line bg-surface p-1.5 shadow-[var(--shadow-float)]"
         >
           {suggestions.map((place, i) => (
             <li
@@ -122,12 +124,12 @@ export function LocationInput({ label, icon, value, onChange, placeholder, error
               id={`${listId}-${i}`}
               role="option"
               aria-selected={i === active}
-              className={`flex cursor-pointer items-center gap-2 px-3 py-2 text-sm ${i === active ? 'bg-accent/8' : 'hover:bg-canvas'}`}
+              className={`flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 text-[14px] ${i === active ? 'bg-accent-soft text-accent-strong' : 'hover:bg-canvas'}`}
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => choose(place)}
               onMouseEnter={() => setActive(i)}
             >
-              <MapPin className="size-3.5 shrink-0 text-muted" aria-hidden />
+              <MapPin className="size-4 shrink-0 text-subtle" aria-hidden />
               <span className="truncate">{place.label}</span>
             </li>
           ))}

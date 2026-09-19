@@ -16,7 +16,8 @@ Try it with one click using the sample trips under the form: a regional run, a s
 - **Route map:** the truck route (OpenRouteService, heavy-goods-vehicle profile) with a marker and popup for every stop: pickup, dropoff, fuel, breaks, rests, restarts.
 - **Trip summary:** distance, driving and on-duty hours, arrival time, number of log sheets, and warnings (such as a restart mid-trip).
 - **Itinerary:** every duty change in order, grouped by day. Hovering an entry highlights its stop on the map.
-- **Daily log sheets:** an SVG copy of the paper *Driver's Daily Log*: the 24-hour grid with the duty line, totals that always add up to 24, remarks with the place of every duty change, shipping documents, and the 70-hour/8-day recap. Print or save as PDF, one sheet per page.
+- **Daily log sheets:** an SVG copy of the paper *Driver's Daily Log*: the 24-hour grid with the duty line, totals that always add up to 24, remarks with the place of every duty change, shipping documents, and the 70-hour/8-day recap. Print or save as PDF, one landscape sheet per page.
+- **Shareable links:** every plan's inputs are kept in the URL, so "Share link" gives anyone the exact same trip, start time included.
 
 ## Hours-of-Service rules applied
 

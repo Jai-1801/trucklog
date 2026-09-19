@@ -15,7 +15,8 @@ const DENVER = place('Denver, CO, USA', 'Denver, CO', 39.7392, -104.9903)
 
 export type Sample = {
   name: string
-  hint: string
+  route: string
+  shows: string
   current: Place
   pickup: Place
   dropoff: Place
@@ -23,8 +24,40 @@ export type Sample = {
 }
 
 export const SAMPLES: Sample[] = [
-  { name: 'Regional run', hint: 'Chicago → St. Louis → Dallas', current: CHICAGO, pickup: ST_LOUIS, dropoff: DALLAS, cycle: 12.5 },
-  { name: 'Short haul', hint: 'Dallas → Fort Worth → Austin', current: DALLAS, pickup: FORT_WORTH, dropoff: AUSTIN, cycle: 0 },
-  { name: 'Coast to coast', hint: 'New York → Chicago → Los Angeles', current: NEW_YORK, pickup: CHICAGO, dropoff: LOS_ANGELES, cycle: 30 },
-  { name: 'Cycle nearly used', hint: 'Atlanta → Nashville → Denver, 62 h used', current: ATLANTA, pickup: NASHVILLE, dropoff: DENVER, cycle: 62 },
+  {
+    name: 'Short haul',
+    route: 'Dallas → Fort Worth → Austin',
+    shows: 'One day, no rests needed',
+    current: DALLAS,
+    pickup: FORT_WORTH,
+    dropoff: AUSTIN,
+    cycle: 0,
+  },
+  {
+    name: 'Regional run',
+    route: 'Chicago → St. Louis → Dallas',
+    shows: '30-min break and 10-hr rests',
+    current: CHICAGO,
+    pickup: ST_LOUIS,
+    dropoff: DALLAS,
+    cycle: 12.5,
+  },
+  {
+    name: 'Coast to coast',
+    route: 'New York → Chicago → Los Angeles',
+    shows: 'Fuel stops across 7 days',
+    current: NEW_YORK,
+    pickup: CHICAGO,
+    dropoff: LOS_ANGELES,
+    cycle: 30,
+  },
+  {
+    name: 'Cycle nearly used',
+    route: 'Atlanta → Nashville → Denver',
+    shows: '62 h used: forces a 34-hr restart',
+    current: ATLANTA,
+    pickup: NASHVILLE,
+    dropoff: DENVER,
+    cycle: 62,
+  },
 ]

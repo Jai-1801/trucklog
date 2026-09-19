@@ -173,7 +173,7 @@ Build it as a pure component: `<LogSheet day={DailyLog} meta={SheetMeta} />`. Sn
 **Mobile (<768):** the form stacks, then the summary chips, the map (60vh), itinerary, and swipeable log sheets. The log sheet scrolls horizontally inside its card. The page never scrolls horizontally.
 
 **Design tokens:**
-- Font: *Inter* (UI) + *JetBrains Mono* (numbers, times). Tabular numerals for all figures.
+- Font: *Plus Jakarta Sans* (UI, tabular numerals for figures) + *JetBrains Mono* (values on the log sheet).
 - Colors: neutral slate background `#f8fafc`, cards white with a `#e2e8f0` border and radius 12. Accent `#2563eb`.
   Status colors (map markers, timeline, legend): Driving `#2563eb` · On Duty `#f59e0b` · Off Duty `#64748b` · Sleeper `#7c3aed` · Restart `#dc2626`. Pickup/dropoff pins: `#16a34a` / `#0f172a`.
 - Spacing on a 4-pt grid. Motion 150–200 ms ease-out. Honor `prefers-reduced-motion`.

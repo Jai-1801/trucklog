@@ -20,24 +20,29 @@ export function Itinerary({ plan, activeStopId, onStopHover }: Props) {
   })
 
   return (
-    <section aria-labelledby="itinerary-title" className="flex h-full flex-col rounded-card border border-line bg-surface">
-      <header className="border-b border-line px-4 py-3">
-        <h2 id="itinerary-title" className="text-sm font-semibold">
+    <section
+      aria-labelledby="itinerary-title"
+      className="flex h-full flex-col overflow-hidden rounded-card border border-line bg-surface shadow-[var(--shadow-card)]"
+    >
+      <header className="border-b border-line px-5 py-4">
+        <h3 id="itinerary-title" className="text-[15px] font-bold">
           Itinerary
-        </h2>
-        <p className="text-xs text-muted">Every duty change, in {plan.summary.timezone.replace('_', ' ')} time</p>
+        </h3>
+        <p className="mt-0.5 text-[13px] text-muted">
+          Every duty change · {plan.summary.timezone.replace('_', ' ')} time
+        </p>
       </header>
-      <ol className="max-h-[520px] min-h-0 flex-1 overflow-y-auto px-2 py-2 xl:max-h-none">
-        <li className="flex items-center gap-3 rounded-lg px-2 py-2">
+      <ol className="max-h-[560px] min-h-0 flex-1 overflow-y-auto p-3 xl:max-h-none">
+        <li className="flex items-center gap-3 rounded-xl px-3 py-3">
           <Dot color={STOP_META.start.color} />
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium">Depart {plan.places.current.short}</p>
+            <p className="text-sm font-bold">Depart {plan.places.current.short}</p>
           </div>
-          <time className="font-mono text-xs text-muted tabular-nums">{formatTime(plan.summary.start_at, tz)}</time>
+          <time className="text-[13px] font-semibold text-muted tabular-nums">{formatTime(plan.summary.start_at, tz)}</time>
         </li>
         {[...groups.entries()].map(([day, items]) => (
           <li key={day}>
-            <p className="sticky top-0 z-10 bg-surface/95 px-2 pt-3 pb-1 text-[11px] font-semibold tracking-wide text-muted uppercase backdrop-blur">
+            <p className="sticky top-0 z-10 bg-surface/95 px-3 pt-4 pb-2 text-[11px] font-bold tracking-[0.08em] text-subtle uppercase backdrop-blur">
               {formatDate(day)}
             </p>
             <ol>
@@ -51,27 +56,27 @@ export function Itinerary({ plan, activeStopId, onStopHover }: Props) {
                     key={index}
                     onMouseEnter={() => stopId && onStopHover(stopId)}
                     onMouseLeave={() => stopId && onStopHover(null)}
-                    className={`flex items-start gap-3 rounded-lg px-2 py-2 transition-colors ${
-                      active ? 'bg-accent/8' : stopId ? 'hover:bg-canvas' : ''
+                    className={`flex items-start gap-3 rounded-xl px-3 py-3 transition-colors ${
+                      active ? 'bg-accent-soft' : stopId ? 'hover:bg-canvas' : ''
                     }`}
                   >
                     <span
-                      className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full"
+                      className="grid size-8 shrink-0 place-items-center rounded-full"
                       style={{ background: `color-mix(in srgb, ${meta.color} 14%, transparent)`, color: meta.color }}
                     >
-                      <Icon className="size-3.5" strokeWidth={2.4} aria-hidden />
+                      <Icon className="size-4" strokeWidth={2.3} aria-hidden />
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium">
+                      <p className="text-sm font-semibold">
                         {event.kind === 'drive' ? `Drive ${Math.round(event.miles).toLocaleString()} mi` : event.note}
                       </p>
-                      <p className="truncate text-xs text-muted">
+                      <p className="mt-0.5 truncate text-[13px] text-muted">
                         {event.kind === 'drive' ? `from ${event.location}` : event.location} ·{' '}
                         <span style={{ color: STATUS_META[event.status].color }}>{STATUS_META[event.status].short}</span>{' '}
                         {formatHours(event.duration_hrs)}
                       </p>
                     </div>
-                    <time className="font-mono text-xs whitespace-nowrap text-muted tabular-nums">
+                    <time className="pt-0.5 text-[13px] font-semibold whitespace-nowrap text-muted tabular-nums">
                       {formatTime(event.start_at, tz)}
                     </time>
                   </li>
@@ -86,5 +91,5 @@ export function Itinerary({ plan, activeStopId, onStopHover }: Props) {
 }
 
 function Dot({ color }: { color: string }) {
-  return <span className="mx-1.5 size-3 shrink-0 rounded-full ring-4 ring-white" style={{ background: color }} />
+  return <span className="mx-2.5 size-3 shrink-0 rounded-full ring-4 ring-canvas" style={{ background: color }} />
 }
