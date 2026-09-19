@@ -14,7 +14,8 @@ drawn and filled in, one per calendar day. The logs must obey Hours-of-Service r
 Deliverables: public GitHub repo, a hosted URL, and a 3–5 min Loom. Budget: **16 work hours or less over 4 days or less.**
 
 **Live:** app https://trucklog-web.vercel.app · API https://trucklog-api-pi.vercel.app/api/health · repo https://github.com/Jai-1801/trucklog
-Deploy: `vercel deploy --prod` from `backend/` (project `trucklog-api`) and from `frontend/` (project `trucklog-web`).
+Deploy: **push to `main`**. Both Vercel projects are Git-connected (`trucklog-api` has Root Directory `backend`, `trucklog-web` has `frontend`), so every push to `main` deploys both to production. Don't run `vercel deploy` from inside `backend/` or `frontend/`: with a Root Directory set, the CLI expects the repo root.
+In Git Bash, prefix `vercel api` calls with `MSYS_NO_PATHCONV=1`, or the `/v9/...` path gets rewritten into a Windows path.
 
 ## 2. Source of truth (read before touching the engine)
 
