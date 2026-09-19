@@ -13,6 +13,9 @@ drawn and filled in, one per calendar day. The logs must obey Hours-of-Service r
 
 Deliverables: public GitHub repo, a hosted URL, and a 3–5 min Loom. Budget: **16 work hours or less over 4 days or less.**
 
+**Live:** app https://trucklog-web.vercel.app · API https://trucklog-api-pi.vercel.app/api/health · repo https://github.com/Jai-1801/trucklog
+Deploy: `vercel deploy --prod` from `backend/` (project `trucklog-api`) and from `frontend/` (project `trucklog-web`).
+
 ## 2. Source of truth (read before touching the engine)
 
 | File | What it is |
@@ -116,4 +119,5 @@ Environment variables (never commit real values; keep `.env.example` current):
 - Don't commit secrets, `.env`, `node_modules`, `.venv`, or `db.sqlite3`.
 - Don't swap the map or routing provider without updating `docs/BUILD.md` §5.
 - Ask before adding any dependency over ~50 kB gzip to the frontend.
+- Don't add a `pyproject.toml` to `backend/`. Vercel's Python builder then expects a uv `[project]` table and the deploy fails. Tool config lives in `pytest.ini` / `ruff.toml`, and deps in `requirements.txt`.
 - When unsure about product behavior, check `docs/BUILD.md` first, then the brief, then ask.
