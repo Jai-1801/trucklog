@@ -45,10 +45,24 @@ function stopIcon(type: StopType, active: boolean): L.DivIcon {
 function FitBounds({ bounds }: { bounds: LatLngBoundsExpression | null }) {
   const map = useMap()
   useEffect(() => {
+    if (!bounds) return
+    // The map narrows when the itinerary column appears; re-measure before fitting.
+    map.invalidateSize({ animate: false })
     // No animation: an interrupted zoom animation (e.g. a second fit while the first is
     // running) leaves Leaflet's vector layer drawn at the old scale.
-    if (bounds) map.fitBounds(bounds, { padding: [36, 36], maxZoom: 11, animate: false })
+    map.fitBounds(bounds, { padding: [36, 36], maxZoom: 11, animate: false })
   }, [map, bounds])
+  return null
+}
+
+/** Leaflet only measures its container on load; keep it in sync with layout changes. */
+function TrackContainerSize() {
+  const map = useMap()
+  useEffect(() => {
+    const observer = new ResizeObserver(() => map.invalidateSize({ animate: false }))
+    observer.observe(map.getContainer())
+    return () => observer.disconnect()
+  }, [map])
   return null
 }
 
@@ -87,6 +101,7 @@ export function RouteMap({ plan, activeStopId, onStopHover }: Props) {
         attribution="Tiles &copy; Esri &mdash; Esri, HERE, Garmin, &copy; OpenStreetMap contributors"
         url={`${ESRI}/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}`}
         maxZoom={16}
+        className="base-tiles"
       />
       <TileLayer url={`${ESRI}/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}`} maxZoom={16} />
       {line.length > 1 && (
@@ -104,6 +119,7 @@ export function RouteMap({ plan, activeStopId, onStopHover }: Props) {
           onHover={onStopHover}
         />
       ))}
+      <TrackContainerSize />
       <FitBounds bounds={bounds} />
     </MapContainer>
   )

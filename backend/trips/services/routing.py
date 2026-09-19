@@ -86,7 +86,12 @@ def _ors_error(exc: UpstreamError) -> ProviderError:
             "One of the locations isn't near a road a truck can reach. Try a nearby city.",
         )
     if code == 2004:
-        return ProviderError("TRIP_TOO_LONG", f"Plans are limited to {MAX_TRIP_MI:,} mi.")
+        # ORS checks straight-line distance before routing, so overseas stops land here too.
+        return ProviderError(
+            "TRIP_TOO_LONG",
+            f"No drivable route under {MAX_TRIP_MI:,} mi connects these locations. "
+            "TruckLog plans trips on the North American road network.",
+        )
     if code == 2009:
         return ProviderError(
             "ROUTE_NOT_FOUND", "No drivable route connects these locations. Are they in the US?"

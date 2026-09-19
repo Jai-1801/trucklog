@@ -1,7 +1,7 @@
 # TruckLog: Build Doc
 
 **Owner:** Jai Surya · **For:** Spotter AI, Full Stack Developer assessment · **Appetite:** 16 hrs / 4 days
-**Deliverables:** GitHub repo · hosted URL · 3–5 min Loom · **Status:** Planning
+**Deliverables:** GitHub repo · hosted URL · 3–5 min Loom · **Status:** M0–M5 shipped (live at https://trucklog-web.vercel.app); Loom pending
 
 ---
 

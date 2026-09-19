@@ -99,3 +99,11 @@
     break-after: auto;
   }
 }
+/* Hairline seams between raster tiles at fractional device-pixel ratios: overlap the
+   opaque base tiles by half a pixel. Leaflet's own fix (plus-lighter blending) would
+   brighten that overlap into white lines, so blend normally here. */
+.base-tiles img.leaflet-tile {
+  width: 256.5px !important;
+  height: 256.5px !important;
+  mix-blend-mode: normal;
+}
