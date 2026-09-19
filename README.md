@@ -94,4 +94,5 @@ npm run dev                 # http://localhost:5173, proxies /api to :8000
 | `frontend/src/features/` | `trip-form`, `route-map`, `itinerary`, `summary`, `eld-log` (the log sheet) |
 | `docs/BUILD.md` | Product spec, API contract, UI spec, plan |
 | `docs/HOS_RULES.md` | Engine spec, worked scenarios, decisions |
+| `docs/TESTING.md` | Manual test guide: inputs, expected outputs, why each part matters |
 | `CLAUDE.md` | Working agreement for AI-assisted development in this repo |
