@@ -11,7 +11,7 @@ function Stat({ icon: Icon, label, value, sub }: { icon: LucideIcon; label: stri
         {label}
       </dt>
       <dd className="mt-3 truncate text-2xl font-extrabold tracking-tight tabular-nums">{value}</dd>
-      <dd className="mt-1 truncate text-[13px] text-muted">{sub}</dd>
+      <dd className="mt-1 text-[13px] leading-snug text-pretty text-muted">{sub}</dd>
     </div>
   )
 }
