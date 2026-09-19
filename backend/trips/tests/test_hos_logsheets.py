@@ -154,3 +154,9 @@ def test_every_sheet_is_a_complete_24_hour_day(to_pickup, to_dropoff, cycle, sta
         assert log.cycle_available_min == max(0, 70 * 60 - log.cycle_total_min)
         total_driven += log.miles_driven
     assert abs(total_driven - events[-1].end_mi) < 1e-6
+
+
+def test_recap_uses_the_same_cycle_rounding_as_the_engine():
+    (day,) = plan(0, 50, cycle_h=12.1)  # 12 h 06 m rounds up to 12 h 15 m
+
+    assert day.cycle_total_min == 12 * 60 + 15 + day.on_duty_today_min

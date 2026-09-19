@@ -76,7 +76,9 @@ def build_daily_logs(
 ) -> list[DailyLog]:
     """`start_at` is the trip start as home-terminal wall-clock time. `label_at` maps a
     trip odometer reading to a place name ("City, ST") for remarks and from/to."""
-    cycle_limit = (limits or HosLimits()).cycle_min
+    limits = limits or HosLimits()
+    res = limits.resolution_min
+    cycle_used_min = math.ceil(cycle_used_min / res) * res  # same rounding as the engine
     offset = start_at.hour * 60 + start_at.minute  # trip minute 0 on the day-1 clock
     trip_end = events[-1].end_min
     day_count = max(1, math.ceil((offset + trip_end) / DAY_MIN))
@@ -131,7 +133,7 @@ def build_daily_logs(
                 remarks=tuple(remarks),
                 on_duty_today_min=totals[DutyStatus.DRIVING] + totals[DutyStatus.ON_DUTY],
                 cycle_total_min=cycle_total,
-                cycle_available_min=max(0, cycle_limit - cycle_total),
+                cycle_available_min=max(0, limits.cycle_min - cycle_total),
             )
         )
     return logs
