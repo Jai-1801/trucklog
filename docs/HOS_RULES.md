@@ -111,10 +111,11 @@ Totals. **Day 2:** OFF 0.5, SB 12, D 11, ON 0.5. **Day 3:** OFF 18.5, SB 2.5, D 
 ON Pickup 06:00–07:00 (cycle 66) → D 07:00–11:00 (cycle 70, mi 200) → **OFF 34-hr restart D1 11:00 – D2 21:00** → D D2 21:00 – D3 03:00 (6 h, remaining 300 mi, mi 500) → ON Dropoff D3 03:00–04:00.
 Assert: no driving while cycle ≥ 70, the restart is exactly 34 h, the cycle resets to 0 afterwards, and Day 2 shows OFF from 00:00–21:00.
 
-### G4: 14-hr window binds before 11-hr driving
+### G4: Pickup mid-shift (the pickup resets the 8-h break clock; the 11-h limit binds)
 
-cycle 0, **300 mi to pickup**, then 600 mi. D 06:00–12:00 (300 mi, 6 h) → ON Pickup 12:00–13:00 (resets the 8-h break counter) → D 13:00–18:00 (5 h, 11 h total, mi 550) → SB 10 h.
-Also add a variant where pickup takes place late in the window, and assert the dropoff/pickup task may run past hour 14 while driving never does.
+cycle 0, **300 mi to pickup**, then 600 mi. D 06:00–12:00 (300 mi, 6 h) → ON Pickup 12:00–13:00 (resets the 8-h break counter, so no separate 30-min break) → D 13:00–18:00 (5 h, 11 h total, mi 550) → SB 10 h.
+
+**Why the 14-hr window almost never binds here:** the most non-driving time that fits in one window is 0.5 h break + 0.5 h fuel + 1 h pickup + 1 h dropoff = 3 h, and 11 + 3 = 14. The rule is still enforced. Its tests run the engine with shortened `HosLimits` (e.g. a 10-h window) to prove that driving stops at the window edge and on-duty tasks may run past it.
 
 ### G5: Property tests (Hypothesis or loops over random inputs)
 
