@@ -1,0 +1,22 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# python
+.venv/
+__pycache__/
+*.pyc
+db.sqlite3
+
+# node
+node_modules/
+dist/
+
+# misc
+.vercel/
+.DS_Store
+
+# local-only files (assessment brief is Spotter's private material; its requirements live in docs/BUILD.md)
+new-full-stack-dev-assessment.docx
+api.md.txt
