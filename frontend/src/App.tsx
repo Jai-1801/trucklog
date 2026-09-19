@@ -5,14 +5,14 @@ import { GithubMark } from './components/GithubMark'
 import { EntryScreen } from './features/entry/EntryScreen'
 import { Preloader } from './features/results/Preloader'
 import { ResultsView } from './features/results/ResultsView'
-import type { Sample } from './features/trip-form/samples'
 import { ApiError, planTrip } from './lib/api'
-import { nextQuarterHourLocal } from './lib/format'
 import { displayText } from './lib/place'
-import { fromSearch, toSearch } from './lib/shareUrl'
+import { type LogDetails, loadDetails, saveDetails } from './lib/details'
+import { detailsFromSearch, fromSearch, toSearch } from './lib/shareUrl'
 import type { PlanRequest, TripPlan } from './lib/types'
 
 const sharedRequest = fromSearch(window.location.search)
+const initialDetails = detailsFromSearch(window.location.search) ?? loadDetails()
 
 const routeLabel = (r: PlanRequest) =>
   [r.current_location, r.pickup_location, r.dropoff_location]
@@ -26,34 +26,31 @@ const routeLabel = (r: PlanRequest) =>
 export default function App() {
   const [editing, setEditing] = useState(false)
   const [lastRequest, setLastRequest] = useState<PlanRequest | null>(sharedRequest)
-  // Bumping the key remounts the form with new starting values (sample, shared link, edit).
+  // Bumping the key remounts the form with new starting values (shared link, edit).
   const [form, setForm] = useState({ key: 0, initial: sharedRequest ?? undefined })
+  const [details, setDetails] = useState<LogDetails>(initialDetails)
+  const detailsRef = useRef(details)
 
   const mutation = useMutation<TripPlan, ApiError, PlanRequest>({
     mutationFn: planTrip,
     onSuccess: (_plan, request) => {
-      window.history.replaceState(null, '', toSearch(request))
+      window.history.replaceState(null, '', toSearch(request, detailsRef.current))
       setEditing(false)
       window.scrollTo({ top: 0 })
     },
   })
 
-  const submit = (request: PlanRequest) => {
-    setLastRequest(request)
-    setForm((f) => ({ key: f.key, initial: request }))
-    mutation.mutate(request)
+  const updateDetails = (next: LogDetails) => {
+    detailsRef.current = next
+    setDetails(next)
+    saveDetails(next)
+    if (lastRequest && mutation.isSuccess) window.history.replaceState(null, '', toSearch(lastRequest, next))
   }
 
-  const runSample = (sample: Sample) => {
-    const request: PlanRequest = {
-      current_location: sample.current,
-      pickup_location: sample.pickup,
-      dropoff_location: sample.dropoff,
-      current_cycle_used_hrs: sample.cycle,
-      start_at: nextQuarterHourLocal(),
-    }
-    setForm((f) => ({ key: f.key + 1, initial: request }))
+  const submit = (request: PlanRequest, nextDetails: LogDetails = detailsRef.current) => {
+    updateDetails(nextDetails)
     setLastRequest(request)
+    setForm((f) => ({ key: f.key, initial: request }))
     mutation.mutate(request)
   }
 
@@ -102,13 +99,19 @@ export default function App() {
 
       <main className="flex-1">
         {showResults ? (
-          <ResultsView key={plan.summary.start_at + plan.summary.total_miles} plan={plan} onEdit={edit} />
+          <ResultsView
+            key={plan.summary.start_at + plan.summary.total_miles}
+            plan={plan}
+            details={details}
+            onDetailsChange={updateDetails}
+            onEdit={edit}
+          />
         ) : (
           <EntryScreen
             formKey={form.key}
             initial={form.initial}
+            initialDetails={details}
             onSubmit={submit}
-            onSample={runSample}
             onRetry={lastRequest ? () => submit(lastRequest) : undefined}
             pending={mutation.isPending}
             error={mutation.error}

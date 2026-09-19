@@ -10,7 +10,9 @@ Enter where the truck is, the pickup, the dropoff and how many hours of the 70-h
 |---|---|---|
 | ![Trip entry](docs/screenshots/entry.jpg) | ![Route, stops and itinerary](docs/screenshots/planner.jpg) | ![Daily log sheet](docs/screenshots/daily-log.jpg) |
 
-The flow is one step at a time: **enter the trip → a short preloader while it's planned → a results workspace** with tabs for *Route and stops*, *Daily logs* and *How it's planned*. "Edit trip" goes back with everything filled in. Try it with one click using the sample trips under the form: a short haul, a regional run, coast to coast, or a trip that runs out of cycle hours and needs a 34-hour restart.
+The flow is one step at a time: **enter the trip → a short preloader while it's planned → a results workspace** with tabs for *Route and stops*, *Daily logs* and *How it's planned*. "Edit trip" goes back with everything filled in.
+
+**Log sheet details.** Driver name, carrier, main office, home terminal, truck/trailer numbers, manifest number and shipper are entered by the user (in the form, or next to the sheets where they update live). Carrier, truck and driver are remembered in the browser for the next trip; shipping documents are per load. Nothing on a sheet is made up: an empty field prints as a blank line, like the paper form.
 
 ## What you get
 

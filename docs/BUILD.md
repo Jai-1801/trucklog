@@ -38,7 +38,7 @@
 7. Itinerary timeline (vertical list of duty events synced with the map, so hovering an event highlights its marker)
 8. Print / Download PDF of all log sheets (`window.print` with print CSS, a clean A4/Letter page per sheet)
 9. "Assumptions" drawer that lists the decisions from `HOS_RULES.md` §6
-10. Sample-trip buttons (e.g. "Chicago → Dallas → Los Angeles") so graders can test in one click
+10. Editable log sheet details (driver, carrier, offices, vehicle, shipping document, shipper), remembered per browser. No sample or demo data in the product
 11. Mobile-responsive layout
 
 **Stretch (cut first):** trip start time picker (otherwise default: next hour) · shareable URL (inputs in query string) · dark mode · pre/post-trip inspection toggle · animated log drawing · editable carrier/truck fields on the log
@@ -140,7 +140,7 @@ Recreate `blank-paper-log.png` as SVG (viewBox about 1000×760):
 - **Grid:** 4 rows (1. Off Duty, 2. Sleeper Berth, 3. Driving, 4. On Duty (not driving)). 24 hour columns labeled Mid-night, 1–11, Noon, 1–11, Mid-night. 15-min tick marks (tall tick on the half hour). A "Total Hours" column on the right, plus the grand total (24).
 - **Duty line:** a single continuous path (stroke about 2.5 px, ink-blue `#1d4ed8`), horizontal on the active row, vertical at each change. This mirrors the hand-drawn style in the video.
 - **Remarks:** under the grid, a bracket spanning each non-driving stop, and a line from the change time down to a rotated (−45°) label: "St. Louis, MO – Pickup".
-- **Shipping documents:** "BOL-{short trip id}", shipper & commodity: "General Freight".
+- **Carrier, vehicle, driver and shipping fields:** entered by the user; blank lines when left empty.
 - **Recap (70 hr / 8 day column):** on duty today (lines 3 + 4), A, B, and C as defined in `HOS_RULES.md` §4. Gray out the 60/7 column.
 - **Interaction:** hover a grid segment to see a tooltip with status, start–end, duration, and location. Day tabs or a horizontal pager ("Day 2 of 3"). Keyboard ←/→ changes the day.
 - **Print:** each sheet on its own page, no app chrome, black ink.

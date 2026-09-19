@@ -3,29 +3,15 @@ import { type KeyboardEvent, useState } from 'react'
 import { formatDate, formatDecimalHours } from '../../lib/format'
 import { STATUS_META } from '../../lib/status'
 import type { DutyStatus, TripPlan } from '../../lib/types'
-import { LogSheet, type SheetMeta } from './LogSheet'
-
-function sheetMeta(plan: TripPlan): SheetMeta {
-  const { current, pickup } = plan.places
-  // Stable, readable shipping number derived from the trip itself.
-  const seed = [...`${plan.summary.start_at}${pickup.short}`].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 7)
-  return {
-    carrier: 'TruckLog Demo Freight LLC',
-    mainOffice: current.short,
-    homeTerminal: `${current.short} (${plan.summary.timezone.replace('_', ' ')})`,
-    vehicle: 'Tractor 101 / Trailer 2201',
-    shippingDoc: `BOL-${String(seed % 1_000_000).padStart(6, '0')}`,
-    shipper: `Shipper at ${pickup.short} · General freight`,
-  }
-}
+import type { LogDetails } from '../../lib/details'
+import { LogSheet } from './LogSheet'
 
 const ORDER: DutyStatus[] = ['OFF', 'SB', 'D', 'ON']
 
-export function LogSheets({ plan }: { plan: TripPlan }) {
+export function LogSheets({ plan, details }: { plan: TripPlan; details: LogDetails }) {
   const [active, setActive] = useState(0)
   const days = plan.days
   const day = days[Math.min(active, days.length - 1)]
-  const meta = sheetMeta(plan)
 
   const go = (i: number) => setActive(Math.max(0, Math.min(days.length - 1, i)))
   const onKeyDown = (e: KeyboardEvent) => {
@@ -113,7 +99,7 @@ export function LogSheets({ plan }: { plan: TripPlan }) {
             aria-labelledby={`log-tab-${i}`}
             className={`log-page min-w-[720px] print:min-w-0 ${i === active ? '' : 'hidden print:block'}`}
           >
-            <LogSheet log={d} meta={meta} dayCount={days.length} />
+            <LogSheet log={d} meta={details} dayCount={days.length} />
           </div>
         ))}
       </div>

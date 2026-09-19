@@ -1,18 +1,10 @@
 import type { ReactNode } from 'react'
 import { formatClock, formatDecimalHours } from '../../lib/format'
+import type { LogDetails } from '../../lib/details'
 import type { DailyLog, DutyStatus, Remark, RemarkKind } from '../../lib/types'
 
 // Drawn to match the FMCSA paper "Driver's Daily Log" (docs/reference: blank-paper-log.png).
 // Printed form = ink; everything filled in from the plan = the accent colour, like pen on paper.
-
-export type SheetMeta = {
-  carrier: string
-  mainOffice: string
-  homeTerminal: string
-  vehicle: string
-  shippingDoc: string
-  shipper: string
-}
 
 const W = 1000
 const H = 760
@@ -118,7 +110,7 @@ function monthDayYear(isoDate: string): [string, string, string] {
   return [m, d, y]
 }
 
-export function LogSheet({ log, meta, dayCount }: { log: DailyLog; meta: SheetMeta; dayCount: number }) {
+export function LogSheet({ log, meta, dayCount }: { log: DailyLog; meta: LogDetails; dayCount: number }) {
   const [month, day, year] = monthDayYear(log.date)
   const total = Object.values(log.totals).reduce((a, b) => a + b, 0)
 
@@ -297,6 +289,7 @@ export function LogSheet({ log, meta, dayCount }: { log: DailyLog; meta: SheetMe
         {meta.shipper}
       </Text>
       <line x1={132} x2={380} y1={REMARKS_BOTTOM + 57} y2={REMARKS_BOTTOM + 57} stroke={RULE} strokeWidth={0.8} />
+      <Field x0={620} x1={960} y={REMARKS_BOTTOM + 44} value={meta.driver} caption="Driver’s name" />
       <Text x={600} y={REMARKS_BOTTOM + 74} size={9.5} anchor="middle">
         Enter name of place you reported and where released from work and when and where each change of duty status occurred.
       </Text>

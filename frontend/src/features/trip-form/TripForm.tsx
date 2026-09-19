@@ -2,16 +2,19 @@ import { Loader2 } from 'lucide-react'
 import { type FormEvent, useState } from 'react'
 import { nextQuarterHourLocal } from '../../lib/format'
 import { displayText } from '../../lib/place'
+import type { LogDetails } from '../../lib/details'
 import type { PlaceInput, PlanRequest } from '../../lib/types'
 import { fieldClass } from '../../lib/ui'
+import { DetailsFields } from './DetailsFields'
 import { LocationInput } from './LocationInput'
 
 type FieldErrors = Partial<Record<keyof PlanRequest, string>>
 
 type Props = {
-  /** Starting values. The parent remounts the form (new `key`) to load a sample, shared link or edit. */
+  /** Starting values. The parent remounts the form (new `key`) to load a shared link or an edit. */
   initial?: PlanRequest
-  onSubmit: (request: PlanRequest) => void
+  initialDetails: LogDetails
+  onSubmit: (request: PlanRequest, details: LogDetails) => void
   pending: boolean
   serverErrors?: Record<string, unknown>
 }
@@ -32,12 +35,13 @@ const Marker = {
   dropoff: <span className="size-2.5 rounded-full bg-ink" />,
 }
 
-export function TripForm({ initial, onSubmit, pending, serverErrors }: Props) {
+export function TripForm({ initial, initialDetails, onSubmit, pending, serverErrors }: Props) {
   const [current, setCurrent] = useState<PlaceInput>(initial?.current_location ?? {})
   const [pickup, setPickup] = useState<PlaceInput>(initial?.pickup_location ?? {})
   const [dropoff, setDropoff] = useState<PlaceInput>(initial?.dropoff_location ?? {})
   const [cycle, setCycle] = useState(String(initial?.current_cycle_used_hrs ?? 0))
   const [startAt, setStartAt] = useState(() => initial?.start_at ?? nextQuarterHourLocal())
+  const [details, setDetails] = useState<LogDetails>(initialDetails)
   const [errors, setErrors] = useState<FieldErrors>({})
 
   const fieldError = (field: keyof PlanRequest) => errors[field] ?? firstMessage(serverErrors?.[field])
@@ -67,7 +71,7 @@ export function TripForm({ initial, onSubmit, pending, serverErrors }: Props) {
       dropoff_location: dropoff,
       current_cycle_used_hrs: hours,
       start_at: startAt || undefined,
-    })
+    }, details)
   }
 
   const cycleNumber = Math.min(70, Math.max(0, Number(cycle) || 0))
@@ -161,6 +165,22 @@ export function TripForm({ initial, onSubmit, pending, serverErrors }: Props) {
           </p>
         </div>
       </div>
+
+      <details className="group mt-8 border-t border-line pt-6" open={Object.values(details).some((v) => v.trim())}>
+        <summary className="flex cursor-pointer list-none items-baseline justify-between gap-4 [&::-webkit-details-marker]:hidden">
+          <span>
+            <span className="block text-sm font-medium">Log sheet details</span>
+            <span className="mt-0.5 block text-[13px] text-muted">
+              Driver, carrier, truck and shipping info printed on each sheet. Optional.
+            </span>
+          </span>
+          <span className="shrink-0 text-[13px] font-semibold text-accent-strong group-open:hidden">Add</span>
+          <span className="hidden shrink-0 text-[13px] font-semibold text-muted group-open:inline">Hide</span>
+        </summary>
+        <div className="mt-5">
+          <DetailsFields value={details} onChange={setDetails} />
+        </div>
+      </details>
 
       <button
         type="submit"

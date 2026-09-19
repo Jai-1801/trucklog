@@ -1,13 +1,13 @@
 import type { ApiError } from '../../lib/api'
 import type { PlanRequest } from '../../lib/types'
-import { SAMPLES, type Sample } from '../trip-form/samples'
+import type { LogDetails } from '../../lib/details'
 import { TripForm } from '../trip-form/TripForm'
 
 type Props = {
   formKey: number
   initial?: PlanRequest
-  onSubmit: (request: PlanRequest) => void
-  onSample: (sample: Sample) => void
+  initialDetails: LogDetails
+  onSubmit: (request: PlanRequest, details: LogDetails) => void
   onRetry?: () => void
   pending: boolean
   error: ApiError | null
@@ -24,7 +24,7 @@ const RULES: [string, string][] = [
   ['Pickup, dropoff', '1 h on duty each'],
 ]
 
-export function EntryScreen({ formKey, initial, onSubmit, onSample, onRetry, pending, error, editing }: Props) {
+export function EntryScreen({ formKey, initial, initialDetails, onSubmit, onRetry, pending, error, editing }: Props) {
   const fieldErrors = error?.code === 'VALIDATION_ERROR' ? error.fields : undefined
   const banner = error && error.code !== 'VALIDATION_ERROR' ? error : null
 
@@ -58,36 +58,16 @@ export function EntryScreen({ formKey, initial, onSubmit, onSample, onRetry, pen
         )}
 
         <div className="rounded-card border border-line p-6 sm:p-8">
-          <TripForm key={formKey} initial={initial} onSubmit={onSubmit} pending={pending} serverErrors={fieldErrors} />
+          <TripForm
+            key={formKey}
+            initial={initial}
+            initialDetails={initialDetails}
+            onSubmit={onSubmit}
+            pending={pending}
+            serverErrors={fieldErrors}
+          />
         </div>
 
-        <section aria-labelledby="samples-title" className="mt-10">
-          <h2 id="samples-title" className="text-sm font-semibold">
-            Or load a sample trip
-          </h2>
-          <ul className="mt-3 border-t border-line">
-            {SAMPLES.map((sample) => (
-              <li key={sample.name} className="border-b border-line">
-                <button
-                  type="button"
-                  disabled={pending}
-                  onClick={() => onSample(sample)}
-                  className="group flex w-full items-baseline gap-4 py-3.5 text-left disabled:opacity-50"
-                >
-                  <span className="min-w-0 flex-1">
-                    <span className="block text-[15px] font-medium group-hover:text-accent-strong">{sample.route}</span>
-                    <span className="mt-0.5 block text-[13px] text-muted">
-                      {sample.cycle} h used · {sample.shows.charAt(0).toLowerCase() + sample.shows.slice(1)}
-                    </span>
-                  </span>
-                  <span className="shrink-0 text-[13px] font-semibold text-accent-strong opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-                    Load
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
       </div>
 
       <section aria-labelledby="rules-title" className="lg:col-start-1 lg:row-start-2 lg:self-start">
