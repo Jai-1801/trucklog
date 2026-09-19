@@ -45,3 +45,27 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Leaflet stop markers (built as static HTML in RouteMap.tsx) */
+.trip-marker {
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  border: 2.5px solid #fff;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.25), 0 4px 10px rgb(15 23 42 / 0.15);
+  transition: transform 150ms ease-out;
+}
+.trip-marker[data-active='true'] {
+  box-shadow: 0 0 0 4px rgb(37 99 235 / 0.25), 0 4px 12px rgb(15 23 42 / 0.25);
+}
+.leaflet-container {
+  font-family: var(--font-sans);
+  background: #eef2f6;
+}
+.leaflet-popup-content-wrapper {
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgb(15 23 42 / 0.15);
+}
+.leaflet-popup-content {
+  margin: 12px 14px;
+}

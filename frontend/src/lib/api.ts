@@ -1,3 +1,5 @@
+import type { Place, PlanRequest, TripPlan } from './types'
+
 const API_BASE = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
 
 export type ApiErrorBody = {
@@ -40,3 +42,9 @@ export async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> 
 export type Health = { ok: boolean; version: string; routing_configured: boolean }
 
 export const getHealth = () => apiFetch<Health>('/api/health')
+
+export const planTrip = (request: PlanRequest) =>
+  apiFetch<TripPlan>('/api/trips/plan', { method: 'POST', body: JSON.stringify(request) })
+
+export const autocomplete = (q: string, signal?: AbortSignal) =>
+  apiFetch<Place[]>(`/api/geocode/autocomplete?q=${encodeURIComponent(q)}`, { signal })

@@ -71,7 +71,7 @@
 | Geocode free text | ORS `/geocode/search` | Nominatim (1 req/s, needs a User-Agent) | Used when the user typed text without picking a suggestion |
 | Routing | ORS `/v2/directions/driving-hgv/geojson` | OSRM public demo (`driving`) | ORS free tier: 2,000 req/day, 40/min |
 | Reverse geocode stops | ORS `/geocode/reverse` | Nominatim reverse | Format "City, ST". Cache by rounded lat/lng (2 dp) |
-| Map tiles | CARTO Positron (light, clean) | OSM standard | Attribution required |
+| Map tiles | Esri World Light Gray Canvas (base + reference labels) | OSM standard | Keyless. CARTO basemaps now watermark "API KEY REQUIRED" without a key. Attribution required |
 | Time zone | `timezonefinder` (offline, Python) | browser zone | Home-terminal time zone |
 
 **Day-1 spike:** confirm the ORS key works for a cross-country HGV route (e.g. NYC → LA, about 2,800 mi) and time it.
